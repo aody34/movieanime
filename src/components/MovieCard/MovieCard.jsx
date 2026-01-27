@@ -6,44 +6,89 @@ import './MovieCard.css';
 const MovieCard = ({ movie, index = 0 }) => {
     const cardRef = useRef(null);
     const glowRef = useRef(null);
+    const imageRef = useRef(null);
+    const overlayRef = useRef(null);
+    const playBtnRef = useRef(null);
 
     const handleMouseEnter = () => {
-        gsap.to(cardRef.current, {
+        const card = cardRef.current;
+
+        // Card lift and scale
+        gsap.to(card, {
             scale: 1.05,
-            duration: 0.3,
+            y: -10,
+            duration: 0.4,
+            ease: 'power2.out',
+            force3D: true
+        });
+
+        // Image zoom
+        gsap.to(imageRef.current, {
+            scale: 1.15,
+            duration: 0.6,
             ease: 'power2.out'
         });
 
-        gsap.to(cardRef.current.querySelector('.card-overlay'), {
+        // Overlay reveal
+        gsap.to(overlayRef.current, {
             opacity: 1,
             duration: 0.3
         });
 
+        // Glow effect
         gsap.to(glowRef.current, {
-            opacity: 0.6,
-            scale: 1.1,
+            opacity: 0.7,
+            scale: 1.2,
             duration: 0.4
         });
+
+        // Play button entrance
+        gsap.fromTo(playBtnRef.current,
+            { scale: 0, opacity: 0 },
+            { scale: 1, opacity: 1, duration: 0.4, ease: 'back.out(2)' }
+        );
     };
 
     const handleMouseLeave = () => {
-        gsap.to(cardRef.current, {
+        const card = cardRef.current;
+
+        // Reset card
+        gsap.to(card, {
             scale: 1,
+            y: 0,
             rotateX: 0,
             rotateY: 0,
             duration: 0.5,
-            ease: 'power3.out'
+            ease: 'power3.out',
+            force3D: true
         });
 
-        gsap.to(cardRef.current.querySelector('.card-overlay'), {
+        // Reset image
+        gsap.to(imageRef.current, {
+            scale: 1,
+            duration: 0.5
+        });
+
+        // Hide overlay
+        gsap.to(overlayRef.current, {
             opacity: 0,
             duration: 0.3
         });
 
+        // Hide glow
         gsap.to(glowRef.current, {
             opacity: 0,
             scale: 1,
+            x: 0,
+            y: 0,
             duration: 0.5
+        });
+
+        // Hide play button
+        gsap.to(playBtnRef.current, {
+            scale: 0,
+            opacity: 0,
+            duration: 0.2
         });
     };
 
@@ -56,24 +101,32 @@ const MovieCard = ({ movie, index = 0 }) => {
         const centerX = rect.width / 2;
         const centerY = rect.height / 2;
 
-        const rotateX = (y - centerY) / 10;
-        const rotateY = (centerX - x) / 10;
+        // 3D tilt effect
+        const rotateX = (y - centerY) / 12;
+        const rotateY = (centerX - x) / 12;
 
         gsap.to(card, {
             rotateX: rotateX,
             rotateY: rotateY,
-            duration: 0.2,
+            duration: 0.3,
             ease: 'power2.out',
-            transformPerspective: 1000
+            transformPerspective: 1000,
+            force3D: true
         });
 
         // Move glow to follow cursor
         gsap.to(glowRef.current, {
             x: x - rect.width / 2,
             y: y - rect.height / 2,
-            duration: 0.2
+            duration: 0.3,
+            force3D: true
         });
     };
+
+    // Get dominant color for glow (simulate based on type)
+    const glowColor = movie.type === 'anime'
+        ? 'rgba(139, 92, 246, 0.6)'
+        : 'rgba(229, 9, 20, 0.6)';
 
     return (
         <Link
@@ -89,11 +142,18 @@ const MovieCard = ({ movie, index = 0 }) => {
                 onMouseMove={handleMouseMove}
             >
                 {/* Glow Effect */}
-                <div ref={glowRef} className="card-glow"></div>
+                <div
+                    ref={glowRef}
+                    className="card-glow"
+                    style={{ background: `radial-gradient(circle, ${glowColor} 0%, transparent 70%)` }}
+                ></div>
 
                 {/* Poster */}
                 <div className="card-poster">
-                    <img src={movie.poster} alt={movie.title} loading="lazy" />
+                    <img ref={imageRef} src={movie.poster} alt={movie.title} loading="lazy" />
+
+                    {/* Shine effect */}
+                    <div className="card-shine"></div>
                 </div>
 
                 {/* Rating Badge */}
@@ -104,8 +164,13 @@ const MovieCard = ({ movie, index = 0 }) => {
                     {movie.rating}
                 </div>
 
+                {/* Type Badge */}
+                <div className={`card-type-badge ${movie.type}`}>
+                    {movie.type === 'anime' ? '🎌' : '🎬'}
+                </div>
+
                 {/* Overlay with details */}
-                <div className="card-overlay">
+                <div ref={overlayRef} className="card-overlay">
                     <div className="card-info">
                         <h3 className="card-title">{movie.title}</h3>
                         <div className="card-meta">
@@ -117,13 +182,15 @@ const MovieCard = ({ movie, index = 0 }) => {
                                 <span key={i} className="card-genre">{genre}</span>
                             ))}
                         </div>
-                        <button className="card-play-btn">
-                            <svg viewBox="0 0 24 24" fill="currentColor" width="20" height="20">
-                                <path d="M8 5V19L19 12L8 5Z" />
-                            </svg>
-                        </button>
                     </div>
                 </div>
+
+                {/* Centered Play Button */}
+                <button ref={playBtnRef} className="card-play-btn">
+                    <svg viewBox="0 0 24 24" fill="currentColor" width="24" height="24">
+                        <path d="M8 5V19L19 12L8 5Z" />
+                    </svg>
+                </button>
             </div>
         </Link>
     );

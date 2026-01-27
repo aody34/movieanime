@@ -11,45 +11,71 @@ const CardSlider = ({ title, items, link, linkText = 'See All' }) => {
     const sectionRef = useRef(null);
     const sliderRef = useRef(null);
     const titleRef = useRef(null);
+    const containerRef = useRef(null);
 
     useEffect(() => {
         const ctx = gsap.context(() => {
-            // Animate section title
+            // Animate section title with scrub
             gsap.fromTo(titleRef.current,
-                { x: -50, opacity: 0 },
+                { x: -100, opacity: 0 },
                 {
                     x: 0,
                     opacity: 1,
-                    duration: 0.8,
+                    duration: 1,
                     ease: 'power3.out',
+                    force3D: true,
                     scrollTrigger: {
                         trigger: sectionRef.current,
-                        start: 'top 85%',
+                        start: 'top 90%',
+                        end: 'top 60%',
+                        scrub: 1,
                         toggleActions: 'play none none reverse'
                     }
                 }
             );
 
-            // Animate cards with stagger
+            // Animate cards with stagger and scrub for smooth reveal
             const cards = sliderRef.current?.querySelectorAll('.movie-card-link');
             if (cards?.length) {
                 gsap.fromTo(cards,
-                    { y: 60, opacity: 0, scale: 0.9 },
+                    {
+                        y: 100,
+                        opacity: 0,
+                        scale: 0.8,
+                        rotateY: -15
+                    },
                     {
                         y: 0,
                         opacity: 1,
                         scale: 1,
-                        duration: 0.6,
+                        rotateY: 0,
+                        duration: 1,
                         stagger: 0.1,
-                        ease: 'power3.out',
+                        ease: 'power4.out',
+                        force3D: true,
                         scrollTrigger: {
                             trigger: sectionRef.current,
-                            start: 'top 80%',
+                            start: 'top 85%',
+                            end: 'top 40%',
+                            scrub: 0.5,
                             toggleActions: 'play none none reverse'
                         }
                     }
                 );
             }
+
+            // Parallax effect on the whole section
+            gsap.to(containerRef.current, {
+                y: -30,
+                ease: 'none',
+                scrollTrigger: {
+                    trigger: sectionRef.current,
+                    start: 'top bottom',
+                    end: 'bottom top',
+                    scrub: true
+                }
+            });
+
         }, sectionRef);
 
         return () => ctx.revert();
@@ -61,17 +87,20 @@ const CardSlider = ({ title, items, link, linkText = 'See All' }) => {
 
         gsap.to(slider, {
             scrollLeft: slider.scrollLeft + (direction === 'left' ? -scrollAmount : scrollAmount),
-            duration: 0.5,
-            ease: 'power2.inOut'
+            duration: 0.6,
+            ease: 'power3.inOut'
         });
     };
 
     return (
         <section ref={sectionRef} className="card-slider-section">
-            <div className="container">
+            <div ref={containerRef} className="container">
                 {/* Header */}
                 <div ref={titleRef} className="slider-header">
-                    <h2 className="slider-title">{title}</h2>
+                    <h2 className="slider-title">
+                        <span className="title-icon">{title.split(' ')[0]}</span>
+                        <span className="title-text">{title.split(' ').slice(1).join(' ')}</span>
+                    </h2>
                     {link && (
                         <Link to={link} className="slider-link">
                             {linkText}
