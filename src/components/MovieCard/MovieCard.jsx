@@ -1,14 +1,14 @@
-import { useRef } from 'react';
-import { Link } from 'react-router-dom';
+import { useRef, useState } from 'react';
 import { gsap } from 'gsap';
 import './MovieCard.css';
 
-const MovieCard = ({ movie, index = 0 }) => {
+const MovieCard = ({ movie, index = 0, onClick }) => {
     const cardRef = useRef(null);
     const glowRef = useRef(null);
     const imageRef = useRef(null);
     const overlayRef = useRef(null);
     const playBtnRef = useRef(null);
+    const [imageLoaded, setImageLoaded] = useState(false);
 
     const handleMouseEnter = () => {
         const card = cardRef.current;
@@ -123,16 +123,25 @@ const MovieCard = ({ movie, index = 0 }) => {
         });
     };
 
+    // Handle image load for fade-in effect
+    const handleImageLoad = () => {
+        setImageLoaded(true);
+        gsap.fromTo(imageRef.current,
+            { opacity: 0 },
+            { opacity: 1, duration: 0.5, ease: 'power2.out' }
+        );
+    };
+
     // Get dominant color for glow (simulate based on type)
     const glowColor = movie.type === 'anime'
         ? 'rgba(139, 92, 246, 0.6)'
         : 'rgba(229, 9, 20, 0.6)';
 
     return (
-        <Link
-            to={`/details/${movie.id}`}
+        <div
             className="movie-card-link"
             style={{ '--delay': `${index * 0.1}s` }}
+            onClick={() => onClick?.(movie)}
         >
             <div
                 ref={cardRef}
@@ -150,7 +159,17 @@ const MovieCard = ({ movie, index = 0 }) => {
 
                 {/* Poster */}
                 <div className="card-poster">
-                    <img ref={imageRef} src={movie.poster} alt={movie.title} loading="lazy" />
+                    <img
+                        ref={imageRef}
+                        src={movie.poster}
+                        alt={movie.title}
+                        loading="lazy"
+                        onLoad={handleImageLoad}
+                        style={{ opacity: imageLoaded ? 1 : 0 }}
+                    />
+
+                    {/* Loading skeleton */}
+                    {!imageLoaded && <div className="card-skeleton"></div>}
 
                     {/* Shine effect */}
                     <div className="card-shine"></div>
@@ -192,7 +211,7 @@ const MovieCard = ({ movie, index = 0 }) => {
                     </svg>
                 </button>
             </div>
-        </Link>
+        </div>
     );
 };
 

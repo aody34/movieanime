@@ -1,5 +1,4 @@
 import { useRef, useEffect } from 'react';
-import { Link } from 'react-router-dom';
 import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import MovieCard from '../MovieCard/MovieCard';
@@ -7,7 +6,7 @@ import './CardSlider.css';
 
 gsap.registerPlugin(ScrollTrigger);
 
-const CardSlider = ({ title, items, link, linkText = 'See All' }) => {
+const CardSlider = ({ title, items, link, linkText = 'See All', scrollToSection }) => {
     const sectionRef = useRef(null);
     const sliderRef = useRef(null);
     const titleRef = useRef(null);
@@ -92,6 +91,13 @@ const CardSlider = ({ title, items, link, linkText = 'See All' }) => {
         });
     };
 
+    const handleLinkClick = (e) => {
+        e.preventDefault();
+        if (link && scrollToSection) {
+            scrollToSection(link.replace('#', ''));
+        }
+    };
+
     return (
         <section ref={sectionRef} className="card-slider-section">
             <div ref={containerRef} className="container">
@@ -102,12 +108,16 @@ const CardSlider = ({ title, items, link, linkText = 'See All' }) => {
                         <span className="title-text">{title.split(' ').slice(1).join(' ')}</span>
                     </h2>
                     {link && (
-                        <Link to={link} className="slider-link">
+                        <a
+                            href={link}
+                            className="slider-link"
+                            onClick={handleLinkClick}
+                        >
                             {linkText}
                             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" width="16" height="16">
                                 <path d="M5 12H19M19 12L12 5M19 12L12 19" />
                             </svg>
-                        </Link>
+                        </a>
                     )}
                 </div>
 

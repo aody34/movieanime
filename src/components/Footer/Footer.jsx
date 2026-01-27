@@ -1,28 +1,40 @@
-import { Link } from 'react-router-dom';
 import './Footer.css';
 
-const Footer = () => {
+const Footer = ({ scrollToSection }) => {
     const currentYear = new Date().getFullYear();
 
     const footerLinks = {
         browse: [
-            { label: 'Home', path: '/' },
-            { label: 'Movies', path: '/movies' },
-            { label: 'Anime', path: '/anime' },
-            { label: 'New Releases', path: '/movies' },
+            { label: 'Home', section: 'home' },
+            { label: 'Trending', section: 'trending' },
+            { label: 'Movies', section: 'movies' },
+            { label: 'Anime', section: 'anime' },
         ],
         genres: [
-            { label: 'Action', path: '/movies' },
-            { label: 'Comedy', path: '/movies' },
-            { label: 'Drama', path: '/movies' },
-            { label: 'Sci-Fi', path: '/movies' },
+            { label: 'Action', section: 'movies' },
+            { label: 'Comedy', section: 'movies' },
+            { label: 'Drama', section: 'movies' },
+            { label: 'Sci-Fi', section: 'movies' },
         ],
         help: [
-            { label: 'FAQ', path: '/' },
-            { label: 'Contact', path: '/' },
-            { label: 'Privacy', path: '/' },
-            { label: 'Terms', path: '/' },
+            { label: 'FAQ', section: 'home' },
+            { label: 'Contact', section: 'home' },
+            { label: 'Privacy', section: 'home' },
+            { label: 'Terms', section: 'home' },
         ],
+    };
+
+    const handleLinkClick = (e, sectionId) => {
+        e.preventDefault();
+        if (scrollToSection) {
+            scrollToSection(sectionId);
+        } else {
+            // Fallback: scroll to section manually
+            const element = document.getElementById(sectionId);
+            if (element) {
+                element.scrollIntoView({ behavior: 'smooth' });
+            }
+        }
     };
 
     return (
@@ -31,7 +43,11 @@ const Footer = () => {
                 <div className="footer-content">
                     {/* Logo & Description */}
                     <div className="footer-brand">
-                        <Link to="/" className="footer-logo">
+                        <a
+                            href="#home"
+                            className="footer-logo"
+                            onClick={(e) => handleLinkClick(e, 'home')}
+                        >
                             <div className="logo-icon">
                                 <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                                     <path d="M4 8L12 4L20 8V16L12 20L4 16V8Z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
@@ -43,7 +59,7 @@ const Footer = () => {
                             <span className="logo-text">
                                 Stream<span className="text-gradient">Verse</span>
                             </span>
-                        </Link>
+                        </a>
                         <p className="footer-description">
                             Your ultimate destination for movies and anime streaming.
                             Discover new content, watch trailers, and build your watchlist.
@@ -79,7 +95,12 @@ const Footer = () => {
                             <ul className="footer-list">
                                 {footerLinks.browse.map((link, index) => (
                                     <li key={index}>
-                                        <Link to={link.path}>{link.label}</Link>
+                                        <a
+                                            href={`#${link.section}`}
+                                            onClick={(e) => handleLinkClick(e, link.section)}
+                                        >
+                                            {link.label}
+                                        </a>
                                     </li>
                                 ))}
                             </ul>
@@ -89,7 +110,12 @@ const Footer = () => {
                             <ul className="footer-list">
                                 {footerLinks.genres.map((link, index) => (
                                     <li key={index}>
-                                        <Link to={link.path}>{link.label}</Link>
+                                        <a
+                                            href={`#${link.section}`}
+                                            onClick={(e) => handleLinkClick(e, link.section)}
+                                        >
+                                            {link.label}
+                                        </a>
                                     </li>
                                 ))}
                             </ul>
@@ -99,7 +125,12 @@ const Footer = () => {
                             <ul className="footer-list">
                                 {footerLinks.help.map((link, index) => (
                                     <li key={index}>
-                                        <Link to={link.path}>{link.label}</Link>
+                                        <a
+                                            href={`#${link.section}`}
+                                            onClick={(e) => handleLinkClick(e, link.section)}
+                                        >
+                                            {link.label}
+                                        </a>
                                     </li>
                                 ))}
                             </ul>
