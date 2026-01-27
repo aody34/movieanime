@@ -90,7 +90,7 @@ const Navbar = () => {
                     </button>
 
                     <button className="navbar-avatar" aria-label="User menu">
-                        <img src="https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=80&q=80" alt="User" />
+                        <img src="/profile.jpg" alt="User" />
                     </button>
 
                     {/* Mobile Menu Toggle */}

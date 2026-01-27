@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import HeroSection from '../components/HeroSection/HeroSection';
 import CardSlider from '../components/CardSlider/CardSlider';
+import VideoPreview from '../components/VideoPreview/VideoPreview';
 import TrailerModal from '../components/TrailerModal/TrailerModal';
 import {
     featuredContent,
@@ -47,6 +48,9 @@ const Home = () => {
                     link="/anime"
                     linkText="Explore Anime"
                 />
+
+                {/* Featured Video Section */}
+                <VideoPreview />
 
                 <CardSlider
                     title="🆕 New Releases"
