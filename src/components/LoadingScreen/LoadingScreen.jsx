@@ -6,82 +6,91 @@ const LoadingScreen = ({ isLoading }) => {
     const loaderRef = useRef(null);
     const logoRef = useRef(null);
     const textRef = useRef(null);
-    const barRef = useRef(null);
     const counterRef = useRef(null);
     const [shouldRender, setShouldRender] = useState(isLoading);
     const [loadProgress, setLoadProgress] = useState(0);
 
     useEffect(() => {
+        if (!loaderRef.current) return;
+
         if (isLoading) {
             setShouldRender(true);
-            gsap.set(loaderRef.current, { display: 'flex' });
 
-            // Cinematic intro timeline
-            const tl = gsap.timeline();
-
-            // Animate counter from 0 to 100
-            const counter = { value: 0 };
-            tl.to(counter, {
-                value: 100,
-                duration: 2.5,
-                ease: 'power2.inOut',
-                onUpdate: () => {
-                    setLoadProgress(Math.floor(counter.value));
-                }
-            });
-
-            // Logo pulse animation
-            gsap.to(logoRef.current, {
-                scale: 1.1,
-                duration: 0.8,
-                ease: 'power2.inOut',
-                repeat: -1,
-                yoyo: true
-            });
-
-            // Letters stagger wave
-            const letters = textRef.current?.querySelectorAll('span');
-            gsap.to(letters, {
-                y: -10,
-                duration: 0.5,
-                stagger: {
-                    each: 0.08,
-                    repeat: -1,
-                    yoyo: true
-                },
-                ease: 'power2.inOut'
-            });
-
-        } else {
-            // Cinematic exit animation
-            const exitTl = gsap.timeline({
-                onComplete: () => {
-                    gsap.set(loaderRef.current, { display: 'none' });
+            // Safety timeout - always hide after 3 seconds max
+            const safetyTimeout = setTimeout(() => {
+                if (loaderRef.current) {
+                    loaderRef.current.style.display = 'none';
                     setShouldRender(false);
                 }
-            });
+            }, 3500);
 
-            // Counter flashes
-            exitTl.to(counterRef.current, {
-                scale: 1.2,
-                color: '#e50914',
-                duration: 0.2
-            });
+            try {
+                // Animate counter from 0 to 100
+                const counter = { value: 0 };
+                gsap.to(counter, {
+                    value: 100,
+                    duration: 2.5,
+                    ease: 'power2.inOut',
+                    onUpdate: () => {
+                        setLoadProgress(Math.floor(counter.value));
+                    }
+                });
 
-            // Logo expands
-            exitTl.to(logoRef.current, {
-                scale: 3,
-                opacity: 0,
-                duration: 0.6,
-                ease: 'power2.in'
-            }, '-=0.1');
+                // Logo pulse animation
+                if (logoRef.current) {
+                    gsap.to(logoRef.current, {
+                        scale: 1.1,
+                        duration: 0.8,
+                        ease: 'power2.inOut',
+                        repeat: -1,
+                        yoyo: true
+                    });
+                }
 
-            // Screen wipes away dramatically
-            exitTl.to(loaderRef.current, {
-                clipPath: 'circle(0% at 50% 50%)',
-                duration: 0.8,
-                ease: 'power4.inOut'
-            }, '-=0.4');
+                // Letters stagger wave
+                const letters = textRef.current?.querySelectorAll('span');
+                if (letters?.length) {
+                    gsap.to(letters, {
+                        y: -10,
+                        duration: 0.5,
+                        stagger: {
+                            each: 0.08,
+                            repeat: -1,
+                            yoyo: true
+                        },
+                        ease: 'power2.inOut'
+                    });
+                }
+            } catch (e) {
+                console.warn('Loading animation error:', e);
+            }
+
+            return () => clearTimeout(safetyTimeout);
+
+        } else {
+            // Exit animation with fallback
+            try {
+                const exitTl = gsap.timeline({
+                    onComplete: () => {
+                        if (loaderRef.current) {
+                            loaderRef.current.style.display = 'none';
+                        }
+                        setShouldRender(false);
+                    }
+                });
+
+                exitTl.to(loaderRef.current, {
+                    opacity: 0,
+                    duration: 0.5,
+                    ease: 'power2.inOut'
+                });
+            } catch (e) {
+                // Fallback: just hide it
+                if (loaderRef.current) {
+                    loaderRef.current.style.display = 'none';
+                }
+                setShouldRender(false);
+            }
         }
     }, [isLoading]);
 
@@ -168,7 +177,7 @@ const LoadingScreen = ({ isLoading }) => {
                 </div>
 
                 {/* Loading Bar */}
-                <div ref={barRef} className="loader-bar">
+                <div className="loader-bar">
                     <div
                         className="loader-bar-fill"
                         style={{ width: `${loadProgress}%` }}

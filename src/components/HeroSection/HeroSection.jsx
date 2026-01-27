@@ -33,22 +33,23 @@ const HeroSection = ({ content }) => {
     }, []);
 
     useEffect(() => {
+        // Safety check - ensure elements exist before animating
+        if (!heroRef.current || !contentRef.current) return;
+
         const ctx = gsap.context(() => {
             // Master timeline for cinematic entrance
             const masterTl = gsap.timeline({
-                defaults: { ease: 'power4.out', force3D: true }
-            });
-
-            // Initial state - everything hidden
-            gsap.set([
-                titleRef.current,
-                subtitleRef.current,
-                descRef.current,
-                badgesRef.current?.children,
-                buttonsRef.current?.children
-            ], {
-                opacity: 0,
-                y: 80
+                defaults: { ease: 'power4.out', force3D: true },
+                onComplete: () => {
+                    // Ensure everything is visible after animation
+                    gsap.set([
+                        titleRef.current,
+                        subtitleRef.current,
+                        descRef.current,
+                        badgesRef.current?.children,
+                        buttonsRef.current?.children
+                    ].filter(Boolean), { opacity: 1, y: 0 });
+                }
             });
 
             // === CINEMATIC INTRO SEQUENCE ===
