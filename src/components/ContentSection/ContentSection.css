@@ -3,6 +3,8 @@
     background: var(--color-bg-primary);
     position: relative;
     overflow: hidden;
+    /* Ensure visibility even if GSAP fails */
+    opacity: 1 !important;
 }
 
 /* Alternating subtle gradient backgrounds */

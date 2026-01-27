@@ -13,113 +13,86 @@ const ContentSection = ({ id, title, subtitle, items, layout = 'slider' }) => {
     const gridRef = useRef(null);
 
     useEffect(() => {
-        const ctx = gsap.context(() => {
-            // === SECTION ENTRANCE/EXIT ANIMATION ===
-            gsap.fromTo(sectionRef.current,
-                { opacity: 0.3 },
-                {
-                    opacity: 1,
-                    duration: 0.5,
-                    scrollTrigger: {
-                        trigger: sectionRef.current,
-                        start: 'top 90%',
-                        end: 'top 50%',
-                        toggleActions: 'play reverse play reverse'
-                    }
-                }
-            );
+        // Safety check
+        if (!sectionRef.current || !gridRef.current) return;
 
-            // === TITLE ANIMATION (Bidirectional) ===
-            gsap.fromTo(titleRef.current,
-                {
-                    x: -100,
-                    opacity: 0,
-                    skewX: -3
-                },
-                {
-                    x: 0,
-                    opacity: 1,
-                    skewX: 0,
-                    duration: 0.8,
-                    ease: 'power3.out',
-                    force3D: true,
-                    scrollTrigger: {
-                        trigger: sectionRef.current,
-                        start: 'top 85%',
-                        toggleActions: 'play reverse play reverse' // Bidirectional!
-                    }
-                }
-            );
-
-            // === SUBTITLE ANIMATION ===
-            if (subtitleRef.current) {
-                gsap.fromTo(subtitleRef.current,
-                    {
-                        y: 20,
-                        opacity: 0
-                    },
-                    {
-                        y: 0,
-                        opacity: 1,
-                        duration: 0.6,
-                        delay: 0.2,
-                        ease: 'power2.out',
-                        scrollTrigger: {
-                            trigger: sectionRef.current,
-                            start: 'top 85%',
-                            toggleActions: 'play reverse play reverse'
-                        }
-                    }
-                );
-            }
-
-            // === INDIVIDUAL CARD ANIMATIONS (Each card triggers separately) ===
-            const cards = gridRef.current?.querySelectorAll('.movie-card-link');
-            if (cards?.length) {
-                cards.forEach((card, index) => {
-                    gsap.fromTo(card,
-                        {
-                            y: 80,
-                            opacity: 0,
-                            scale: 0.85,
-                            rotateY: -8
-                        },
-                        {
-                            y: 0,
-                            opacity: 1,
-                            scale: 1,
-                            rotateY: 0,
-                            duration: 0.7,
-                            delay: index * 0.06, // Stagger effect
-                            ease: 'back.out(1.7)', // Bouncy reveal
-                            force3D: true,
-                            scrollTrigger: {
-                                trigger: card,
-                                start: 'top 95%',
-                                end: 'top 70%',
-                                toggleActions: 'play reverse play reverse' // Bidirectional!
+        // Small delay to ensure DOM is ready
+        const timeoutId = setTimeout(() => {
+            try {
+                const ctx = gsap.context(() => {
+                    // === TITLE ANIMATION ===
+                    if (titleRef.current) {
+                        gsap.fromTo(titleRef.current,
+                            { x: -50, opacity: 0 },
+                            {
+                                x: 0,
+                                opacity: 1,
+                                duration: 0.8,
+                                ease: 'power3.out',
+                                scrollTrigger: {
+                                    trigger: sectionRef.current,
+                                    start: 'top 85%',
+                                    toggleActions: 'play none none none'
+                                }
                             }
-                        }
-                    );
-                });
-            }
+                        );
+                    }
 
-            // === EXIT ANIMATION (When scrolling past section) ===
-            gsap.to(sectionRef.current, {
-                opacity: 0.5,
-                y: -30,
-                ease: 'none',
-                scrollTrigger: {
-                    trigger: sectionRef.current,
-                    start: 'bottom 30%',
-                    end: 'bottom top',
-                    scrub: true
+                    // === SUBTITLE ANIMATION ===
+                    if (subtitleRef.current) {
+                        gsap.fromTo(subtitleRef.current,
+                            { y: 20, opacity: 0 },
+                            {
+                                y: 0,
+                                opacity: 1,
+                                duration: 0.6,
+                                delay: 0.2,
+                                scrollTrigger: {
+                                    trigger: sectionRef.current,
+                                    start: 'top 85%',
+                                    toggleActions: 'play none none none'
+                                }
+                            }
+                        );
+                    }
+
+                    // === CARDS STAGGER ANIMATION ===
+                    const cards = gridRef.current?.querySelectorAll('.movie-card-link');
+                    if (cards?.length) {
+                        gsap.fromTo(cards,
+                            { y: 60, opacity: 0, scale: 0.9 },
+                            {
+                                y: 0,
+                                opacity: 1,
+                                scale: 1,
+                                duration: 0.6,
+                                stagger: 0.08,
+                                ease: 'back.out(1.4)',
+                                scrollTrigger: {
+                                    trigger: gridRef.current,
+                                    start: 'top 90%',
+                                    toggleActions: 'play none none none'
+                                }
+                            }
+                        );
+                    }
+                }, sectionRef);
+
+                return () => ctx.revert();
+            } catch (e) {
+                console.warn('ContentSection animation error:', e);
+                // Fallback: make everything visible
+                if (gridRef.current) {
+                    const cards = gridRef.current.querySelectorAll('.movie-card-link');
+                    cards.forEach(card => {
+                        card.style.opacity = '1';
+                        card.style.transform = 'none';
+                    });
                 }
-            });
+            }
+        }, 100);
 
-        }, sectionRef);
-
-        return () => ctx.revert();
+        return () => clearTimeout(timeoutId);
     }, [items]);
 
     return (
