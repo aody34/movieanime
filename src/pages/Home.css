@@ -1,0 +1,16 @@
+.home-page {
+    min-height: 100vh;
+}
+
+.home-content {
+    position: relative;
+    z-index: 10;
+    margin-top: -100px;
+    padding-bottom: var(--spacing-xl);
+}
+
+@media (max-width: 768px) {
+    .home-content {
+        margin-top: 0;
+    }
+}
