@@ -11,67 +11,95 @@ const CardSlider = ({ title, items, link, linkText = 'See All', scrollToSection 
     const sliderRef = useRef(null);
     const titleRef = useRef(null);
     const containerRef = useRef(null);
+    const arrowLeftRef = useRef(null);
+    const arrowRightRef = useRef(null);
 
     useEffect(() => {
         const ctx = gsap.context(() => {
-            // Animate section title with scrub
+            // === TITLE ANIMATION (Bidirectional) ===
             gsap.fromTo(titleRef.current,
-                { x: -100, opacity: 0 },
+                {
+                    x: -80,
+                    opacity: 0,
+                    skewX: -5
+                },
                 {
                     x: 0,
                     opacity: 1,
+                    skewX: 0,
                     duration: 1,
                     ease: 'power3.out',
                     force3D: true,
                     scrollTrigger: {
                         trigger: sectionRef.current,
-                        start: 'top 90%',
-                        end: 'top 60%',
-                        scrub: 1,
-                        toggleActions: 'play none none reverse'
+                        start: 'top 85%',
+                        end: 'top 50%',
+                        toggleActions: 'play reverse play reverse' // Bidirectional!
                     }
                 }
             );
 
-            // Animate cards with stagger and scrub for smooth reveal
+            // === INDIVIDUAL CARD ANIMATIONS ===
             const cards = sliderRef.current?.querySelectorAll('.movie-card-link');
             if (cards?.length) {
-                gsap.fromTo(cards,
-                    {
-                        y: 100,
-                        opacity: 0,
-                        scale: 0.8,
-                        rotateY: -15
-                    },
-                    {
-                        y: 0,
-                        opacity: 1,
-                        scale: 1,
-                        rotateY: 0,
-                        duration: 1,
-                        stagger: 0.1,
-                        ease: 'power4.out',
-                        force3D: true,
-                        scrollTrigger: {
-                            trigger: sectionRef.current,
-                            start: 'top 85%',
-                            end: 'top 40%',
-                            scrub: 0.5,
-                            toggleActions: 'play none none reverse'
+                cards.forEach((card, index) => {
+                    // Each card has its own ScrollTrigger
+                    gsap.fromTo(card,
+                        {
+                            y: 80,
+                            opacity: 0,
+                            scale: 0.85,
+                            rotateX: -10
+                        },
+                        {
+                            y: 0,
+                            opacity: 1,
+                            scale: 1,
+                            rotateX: 0,
+                            duration: 0.8,
+                            delay: index * 0.05, // Stagger effect
+                            ease: 'back.out(1.4)',
+                            force3D: true,
+                            scrollTrigger: {
+                                trigger: card,
+                                start: 'top 95%',
+                                end: 'top 60%',
+                                toggleActions: 'play reverse play reverse' // Bidirectional!
+                            }
                         }
-                    }
-                );
+                    );
+                });
             }
 
-            // Parallax effect on the whole section
+            // === NAVIGATION ARROWS ANIMATION ===
+            gsap.fromTo([arrowLeftRef.current, arrowRightRef.current],
+                {
+                    opacity: 0,
+                    scale: 0.5
+                },
+                {
+                    opacity: 1,
+                    scale: 1,
+                    duration: 0.6,
+                    stagger: 0.15,
+                    ease: 'back.out(2)',
+                    scrollTrigger: {
+                        trigger: sectionRef.current,
+                        start: 'top 80%',
+                        toggleActions: 'play reverse play reverse'
+                    }
+                }
+            );
+
+            // === SUBTLE PARALLAX ON SECTION ===
             gsap.to(containerRef.current, {
-                y: -30,
+                y: -20,
                 ease: 'none',
                 scrollTrigger: {
                     trigger: sectionRef.current,
                     start: 'top bottom',
                     end: 'bottom top',
-                    scrub: true
+                    scrub: 0.5
                 }
             });
 
@@ -125,6 +153,7 @@ const CardSlider = ({ title, items, link, linkText = 'See All', scrollToSection 
                 <div className="slider-container">
                     {/* Navigation Arrows */}
                     <button
+                        ref={arrowLeftRef}
                         className="slider-arrow slider-arrow-left"
                         onClick={() => scroll('left')}
                         aria-label="Scroll left"
@@ -142,6 +171,7 @@ const CardSlider = ({ title, items, link, linkText = 'See All', scrollToSection 
                     </div>
 
                     <button
+                        ref={arrowRightRef}
                         className="slider-arrow slider-arrow-right"
                         onClick={() => scroll('right')}
                         aria-label="Scroll right"

@@ -9,48 +9,138 @@ const VideoPreview = () => {
     const sectionRef = useRef(null);
     const videoRef = useRef(null);
     const containerRef = useRef(null);
+    const titleRef = useRef(null);
+    const subtitleRef = useRef(null);
+    const thumbnailsRef = useRef(null);
 
     useEffect(() => {
         const ctx = gsap.context(() => {
-            // Animate section title
-            gsap.fromTo('.video-section-title',
-                { y: 50, opacity: 0 },
+            // === SECTION FADE IN/OUT ===
+            gsap.fromTo(sectionRef.current,
+                { opacity: 0.5 },
+                {
+                    opacity: 1,
+                    duration: 0.6,
+                    scrollTrigger: {
+                        trigger: sectionRef.current,
+                        start: 'top 90%',
+                        end: 'top 50%',
+                        toggleActions: 'play reverse play reverse'
+                    }
+                }
+            );
+
+            // === TITLE ANIMATION (Bidirectional) ===
+            gsap.fromTo(titleRef.current,
+                {
+                    y: 60,
+                    opacity: 0,
+                    scale: 0.95
+                },
                 {
                     y: 0,
                     opacity: 1,
+                    scale: 1,
                     duration: 0.8,
                     ease: 'power3.out',
                     scrollTrigger: {
                         trigger: sectionRef.current,
-                        start: 'top 80%',
-                        toggleActions: 'play none none reverse'
+                        start: 'top 85%',
+                        toggleActions: 'play reverse play reverse' // Bidirectional!
                     }
                 }
             );
 
-            // Video container reveal
+            // === SUBTITLE ANIMATION ===
+            gsap.fromTo(subtitleRef.current,
+                {
+                    y: 30,
+                    opacity: 0
+                },
+                {
+                    y: 0,
+                    opacity: 1,
+                    duration: 0.6,
+                    delay: 0.2,
+                    ease: 'power2.out',
+                    scrollTrigger: {
+                        trigger: sectionRef.current,
+                        start: 'top 85%',
+                        toggleActions: 'play reverse play reverse'
+                    }
+                }
+            );
+
+            // === VIDEO CONTAINER REVEAL ===
             gsap.fromTo(containerRef.current,
-                { scale: 0.9, opacity: 0 },
+                {
+                    scale: 0.85,
+                    opacity: 0,
+                    y: 50,
+                    rotateX: -5
+                },
                 {
                     scale: 1,
                     opacity: 1,
+                    y: 0,
+                    rotateX: 0,
                     duration: 1,
                     ease: 'power3.out',
                     scrollTrigger: {
-                        trigger: sectionRef.current,
-                        start: 'top 70%',
-                        toggleActions: 'play none none reverse'
+                        trigger: containerRef.current,
+                        start: 'top 90%',
+                        toggleActions: 'play reverse play reverse' // Bidirectional!
                     }
                 }
             );
 
-            // Parallax effect on scroll
+            // === THUMBNAILS STAGGER ANIMATION ===
+            const thumbnails = thumbnailsRef.current?.querySelectorAll('.video-thumbnail');
+            if (thumbnails?.length) {
+                thumbnails.forEach((thumb, index) => {
+                    gsap.fromTo(thumb,
+                        {
+                            y: 50,
+                            opacity: 0,
+                            scale: 0.9
+                        },
+                        {
+                            y: 0,
+                            opacity: 1,
+                            scale: 1,
+                            duration: 0.6,
+                            delay: index * 0.15,
+                            ease: 'back.out(1.5)',
+                            scrollTrigger: {
+                                trigger: thumb,
+                                start: 'top 95%',
+                                toggleActions: 'play reverse play reverse' // Bidirectional!
+                            }
+                        }
+                    );
+                });
+            }
+
+            // === SUBTLE PARALLAX ON SCROLL ===
             gsap.to(containerRef.current, {
-                y: -30,
+                y: -25,
                 ease: 'none',
                 scrollTrigger: {
                     trigger: sectionRef.current,
                     start: 'top bottom',
+                    end: 'bottom top',
+                    scrub: 0.5
+                }
+            });
+
+            // === EXIT ANIMATION ===
+            gsap.to(sectionRef.current, {
+                opacity: 0.6,
+                y: -20,
+                ease: 'none',
+                scrollTrigger: {
+                    trigger: sectionRef.current,
+                    start: 'bottom 40%',
                     end: 'bottom top',
                     scrub: true
                 }
@@ -61,7 +151,7 @@ const VideoPreview = () => {
         return () => ctx.revert();
     }, []);
 
-    // Sample trailer videos (using YouTube embeds with autoplay)
+    // Sample trailer videos
     const featuredTrailers = [
         {
             id: 1,
@@ -88,11 +178,13 @@ const VideoPreview = () => {
             <div className="container">
                 {/* Section Header */}
                 <div className="video-section-header">
-                    <h2 className="video-section-title">
+                    <h2 ref={titleRef} className="video-section-title">
                         <span className="title-icon">🎬</span>
                         <span className="title-text">Featured Trailers</span>
                     </h2>
-                    <p className="video-section-subtitle">Watch the latest trailers from trending shows</p>
+                    <p ref={subtitleRef} className="video-section-subtitle">
+                        Watch the latest trailers from trending shows
+                    </p>
                 </div>
 
                 {/* Main Featured Video */}
@@ -119,7 +211,7 @@ const VideoPreview = () => {
                 </div>
 
                 {/* Thumbnail Grid */}
-                <div className="video-thumbnails">
+                <div ref={thumbnailsRef} className="video-thumbnails">
                     {featuredTrailers.slice(1).map((trailer, index) => (
                         <a
                             key={trailer.id}

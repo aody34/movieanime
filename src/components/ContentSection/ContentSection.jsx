@@ -9,52 +9,113 @@ gsap.registerPlugin(ScrollTrigger);
 const ContentSection = ({ id, title, subtitle, items, layout = 'slider' }) => {
     const sectionRef = useRef(null);
     const titleRef = useRef(null);
+    const subtitleRef = useRef(null);
     const gridRef = useRef(null);
 
     useEffect(() => {
         const ctx = gsap.context(() => {
-            // Title animation
+            // === SECTION ENTRANCE/EXIT ANIMATION ===
+            gsap.fromTo(sectionRef.current,
+                { opacity: 0.3 },
+                {
+                    opacity: 1,
+                    duration: 0.5,
+                    scrollTrigger: {
+                        trigger: sectionRef.current,
+                        start: 'top 90%',
+                        end: 'top 50%',
+                        toggleActions: 'play reverse play reverse'
+                    }
+                }
+            );
+
+            // === TITLE ANIMATION (Bidirectional) ===
             gsap.fromTo(titleRef.current,
-                { x: -80, opacity: 0 },
+                {
+                    x: -100,
+                    opacity: 0,
+                    skewX: -3
+                },
                 {
                     x: 0,
                     opacity: 1,
+                    skewX: 0,
                     duration: 0.8,
                     ease: 'power3.out',
                     force3D: true,
                     scrollTrigger: {
                         trigger: sectionRef.current,
                         start: 'top 85%',
-                        toggleActions: 'play none none reverse'
+                        toggleActions: 'play reverse play reverse' // Bidirectional!
                     }
                 }
             );
 
-            // Cards stagger animation - THE WOW FACTOR
-            const cards = gridRef.current?.querySelectorAll('.movie-card-link');
-            if (cards?.length) {
-                gsap.fromTo(cards,
+            // === SUBTITLE ANIMATION ===
+            if (subtitleRef.current) {
+                gsap.fromTo(subtitleRef.current,
                     {
-                        y: 80,
-                        opacity: 0,
-                        scale: 0.85
+                        y: 20,
+                        opacity: 0
                     },
                     {
                         y: 0,
                         opacity: 1,
-                        scale: 1,
-                        duration: 0.8,
-                        stagger: 0.08, // Creates "one-by-one" look
-                        ease: 'back.out(1.7)', // Bouncy reveal
-                        force3D: true,
+                        duration: 0.6,
+                        delay: 0.2,
+                        ease: 'power2.out',
                         scrollTrigger: {
-                            trigger: gridRef.current,
+                            trigger: sectionRef.current,
                             start: 'top 85%',
-                            toggleActions: 'play none none reverse'
+                            toggleActions: 'play reverse play reverse'
                         }
                     }
                 );
             }
+
+            // === INDIVIDUAL CARD ANIMATIONS (Each card triggers separately) ===
+            const cards = gridRef.current?.querySelectorAll('.movie-card-link');
+            if (cards?.length) {
+                cards.forEach((card, index) => {
+                    gsap.fromTo(card,
+                        {
+                            y: 80,
+                            opacity: 0,
+                            scale: 0.85,
+                            rotateY: -8
+                        },
+                        {
+                            y: 0,
+                            opacity: 1,
+                            scale: 1,
+                            rotateY: 0,
+                            duration: 0.7,
+                            delay: index * 0.06, // Stagger effect
+                            ease: 'back.out(1.7)', // Bouncy reveal
+                            force3D: true,
+                            scrollTrigger: {
+                                trigger: card,
+                                start: 'top 95%',
+                                end: 'top 70%',
+                                toggleActions: 'play reverse play reverse' // Bidirectional!
+                            }
+                        }
+                    );
+                });
+            }
+
+            // === EXIT ANIMATION (When scrolling past section) ===
+            gsap.to(sectionRef.current, {
+                opacity: 0.5,
+                y: -30,
+                ease: 'none',
+                scrollTrigger: {
+                    trigger: sectionRef.current,
+                    start: 'bottom 30%',
+                    end: 'bottom top',
+                    scrub: true
+                }
+            });
 
         }, sectionRef);
 
@@ -65,10 +126,10 @@ const ContentSection = ({ id, title, subtitle, items, layout = 'slider' }) => {
         <section ref={sectionRef} id={id} className="content-section">
             <div className="container">
                 {/* Section Header */}
-                <div ref={titleRef} className="section-header">
+                <div className="section-header">
                     <div className="section-titles">
-                        <h2 className="section-title">{title}</h2>
-                        {subtitle && <p className="section-subtitle">{subtitle}</p>}
+                        <h2 ref={titleRef} className="section-title">{title}</h2>
+                        {subtitle && <p ref={subtitleRef} className="section-subtitle">{subtitle}</p>}
                     </div>
                 </div>
 

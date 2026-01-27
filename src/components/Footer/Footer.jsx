@@ -1,6 +1,15 @@
+import { useRef, useEffect } from 'react';
+import { gsap } from 'gsap';
+import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import './Footer.css';
 
+gsap.registerPlugin(ScrollTrigger);
+
 const Footer = ({ scrollToSection }) => {
+    const footerRef = useRef(null);
+    const brandRef = useRef(null);
+    const linksRef = useRef(null);
+    const bottomRef = useRef(null);
     const currentYear = new Date().getFullYear();
 
     const footerLinks = {
@@ -24,12 +33,144 @@ const Footer = ({ scrollToSection }) => {
         ],
     };
 
+    useEffect(() => {
+        const ctx = gsap.context(() => {
+            // === FOOTER ENTRANCE ANIMATION ===
+            gsap.fromTo(footerRef.current,
+                { opacity: 0 },
+                {
+                    opacity: 1,
+                    duration: 0.8,
+                    scrollTrigger: {
+                        trigger: footerRef.current,
+                        start: 'top 95%',
+                        toggleActions: 'play reverse play reverse'
+                    }
+                }
+            );
+
+            // === BRAND SECTION ANIMATION ===
+            gsap.fromTo(brandRef.current,
+                {
+                    x: -80,
+                    opacity: 0,
+                    scale: 0.95
+                },
+                {
+                    x: 0,
+                    opacity: 1,
+                    scale: 1,
+                    duration: 0.8,
+                    ease: 'power3.out',
+                    scrollTrigger: {
+                        trigger: footerRef.current,
+                        start: 'top 90%',
+                        toggleActions: 'play reverse play reverse'
+                    }
+                }
+            );
+
+            // === LINK COLUMNS STAGGER ===
+            const columns = linksRef.current?.querySelectorAll('.footer-column');
+            if (columns?.length) {
+                gsap.fromTo(columns,
+                    {
+                        y: 50,
+                        opacity: 0
+                    },
+                    {
+                        y: 0,
+                        opacity: 1,
+                        duration: 0.6,
+                        stagger: 0.15,
+                        ease: 'power2.out',
+                        scrollTrigger: {
+                            trigger: footerRef.current,
+                            start: 'top 85%',
+                            toggleActions: 'play reverse play reverse'
+                        }
+                    }
+                );
+            }
+
+            // === SOCIAL ICONS ANIMATION ===
+            const socialLinks = footerRef.current?.querySelectorAll('.social-link');
+            if (socialLinks?.length) {
+                gsap.fromTo(socialLinks,
+                    {
+                        scale: 0,
+                        opacity: 0,
+                        rotation: -180
+                    },
+                    {
+                        scale: 1,
+                        opacity: 1,
+                        rotation: 0,
+                        duration: 0.5,
+                        stagger: 0.1,
+                        ease: 'back.out(2)',
+                        scrollTrigger: {
+                            trigger: footerRef.current,
+                            start: 'top 80%',
+                            toggleActions: 'play reverse play reverse'
+                        }
+                    }
+                );
+            }
+
+            // === BOTTOM TEXT ANIMATION ===
+            gsap.fromTo(bottomRef.current,
+                {
+                    y: 30,
+                    opacity: 0
+                },
+                {
+                    y: 0,
+                    opacity: 1,
+                    duration: 0.6,
+                    ease: 'power2.out',
+                    scrollTrigger: {
+                        trigger: bottomRef.current,
+                        start: 'top 98%',
+                        toggleActions: 'play reverse play reverse'
+                    }
+                }
+            );
+
+            // === BOTTOM TEXT PARAGRAPHS STAGGER ===
+            const bottomTexts = bottomRef.current?.querySelectorAll('p');
+            if (bottomTexts?.length) {
+                gsap.fromTo(bottomTexts,
+                    {
+                        y: 20,
+                        opacity: 0
+                    },
+                    {
+                        y: 0,
+                        opacity: 1,
+                        duration: 0.5,
+                        stagger: 0.2,
+                        delay: 0.2,
+                        ease: 'power2.out',
+                        scrollTrigger: {
+                            trigger: bottomRef.current,
+                            start: 'top 98%',
+                            toggleActions: 'play reverse play reverse'
+                        }
+                    }
+                );
+            }
+
+        }, footerRef);
+
+        return () => ctx.revert();
+    }, []);
+
     const handleLinkClick = (e, sectionId) => {
         e.preventDefault();
         if (scrollToSection) {
             scrollToSection(sectionId);
         } else {
-            // Fallback: scroll to section manually
             const element = document.getElementById(sectionId);
             if (element) {
                 element.scrollIntoView({ behavior: 'smooth' });
@@ -38,11 +179,11 @@ const Footer = ({ scrollToSection }) => {
     };
 
     return (
-        <footer className="footer">
+        <footer ref={footerRef} className="footer">
             <div className="container">
                 <div className="footer-content">
                     {/* Logo & Description */}
-                    <div className="footer-brand">
+                    <div ref={brandRef} className="footer-brand">
                         <a
                             href="#home"
                             className="footer-logo"
@@ -89,7 +230,7 @@ const Footer = ({ scrollToSection }) => {
                     </div>
 
                     {/* Links */}
-                    <div className="footer-links">
+                    <div ref={linksRef} className="footer-links">
                         <div className="footer-column">
                             <h4 className="footer-heading">Browse</h4>
                             <ul className="footer-list">
@@ -139,7 +280,7 @@ const Footer = ({ scrollToSection }) => {
                 </div>
 
                 {/* Bottom */}
-                <div className="footer-bottom">
+                <div ref={bottomRef} className="footer-bottom">
                     <p>&copy; {currentYear} StreamVerse. All rights reserved.</p>
                     <p>Made with ❤️ for Movie & Anime lovers</p>
                 </div>
