@@ -1,0 +1,122 @@
+.content-section {
+    padding: var(--spacing-3xl) 0;
+    background: var(--color-bg-primary);
+    position: relative;
+    overflow: hidden;
+}
+
+/* Alternating subtle gradient backgrounds */
+.content-section:nth-child(odd)::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(ellipse at 30% 50%,
+            rgba(229, 9, 20, 0.03) 0%,
+            transparent 60%);
+    pointer-events: none;
+}
+
+.content-section:nth-child(even)::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(ellipse at 70% 50%,
+            rgba(139, 92, 246, 0.03) 0%,
+            transparent 60%);
+    pointer-events: none;
+}
+
+/* Section Header */
+.section-header {
+    margin-bottom: var(--spacing-2xl);
+    will-change: transform, opacity;
+}
+
+.section-title {
+    font-size: clamp(1.5rem, 3vw, 2rem);
+    font-weight: 700;
+    margin-bottom: var(--spacing-xs);
+    background: linear-gradient(135deg, var(--color-text-primary) 0%, var(--color-text-secondary) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.section-subtitle {
+    font-size: 1rem;
+    color: var(--color-text-muted);
+    margin: 0;
+}
+
+/* Grid Layout */
+.content-grid {
+    display: grid;
+    grid-template-columns: repeat(6, 1fr);
+    gap: var(--spacing-lg);
+}
+
+/* Slider Layout */
+.content-slider {
+    display: flex;
+    gap: var(--spacing-md);
+    overflow-x: auto;
+    overflow-y: hidden;
+    scroll-behavior: smooth;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+    padding: var(--spacing-sm) 0;
+}
+
+.content-slider::-webkit-scrollbar {
+    display: none;
+}
+
+.content-slider .movie-card-link {
+    flex: 0 0 auto;
+    width: 180px;
+}
+
+/* Grid responsive */
+@media (max-width: 1400px) {
+    .content-grid {
+        grid-template-columns: repeat(5, 1fr);
+    }
+}
+
+@media (max-width: 1200px) {
+    .content-grid {
+        grid-template-columns: repeat(4, 1fr);
+    }
+}
+
+@media (max-width: 992px) {
+    .content-grid {
+        grid-template-columns: repeat(3, 1fr);
+    }
+}
+
+@media (max-width: 768px) {
+    .content-section {
+        padding: var(--spacing-2xl) 0;
+    }
+
+    .content-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: var(--spacing-md);
+    }
+
+    .content-slider .movie-card-link {
+        width: 150px;
+    }
+}
+
+@media (max-width: 480px) {
+    .content-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: var(--spacing-sm);
+    }
+
+    .content-slider .movie-card-link {
+        width: 130px;
+    }
+}

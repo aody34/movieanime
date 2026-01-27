@@ -87,9 +87,37 @@ const HeroSection = ({ content, onPlayTrailer }) => {
                 '-=0.4'
             );
 
+            // Mouse-follow floating text effect
+            const handleMouseMove = (e) => {
+                const { clientX, clientY } = e;
+                const { innerWidth, innerHeight } = window;
+
+                const xPercent = (clientX / innerWidth - 0.5) * 2;
+                const yPercent = (clientY / innerHeight - 0.5) * 2;
+
+                gsap.to(contentRef.current, {
+                    x: xPercent * 15,
+                    y: yPercent * 10,
+                    duration: 0.8,
+                    ease: 'power2.out',
+                    force3D: true
+                });
+
+                // Video subtle counter-movement
+                gsap.to(videoRef.current, {
+                    x: xPercent * -8,
+                    y: yPercent * -5,
+                    duration: 1,
+                    ease: 'power2.out',
+                    force3D: true
+                });
+            };
+
+            window.addEventListener('mousemove', handleMouseMove);
+
             // Parallax effect on scroll for video
             gsap.to(videoRef.current, {
-                yPercent: 20,
+                yPercent: 25,
                 ease: 'none',
                 scrollTrigger: {
                     trigger: heroRef.current,
@@ -101,8 +129,8 @@ const HeroSection = ({ content, onPlayTrailer }) => {
 
             // Content parallax (moves slower than video)
             gsap.to(contentRef.current, {
-                yPercent: -10,
-                opacity: 0.5,
+                yPercent: -15,
+                opacity: 0,
                 ease: 'none',
                 scrollTrigger: {
                     trigger: heroRef.current,
@@ -111,6 +139,11 @@ const HeroSection = ({ content, onPlayTrailer }) => {
                     scrub: true
                 }
             });
+
+            // Cleanup
+            return () => {
+                window.removeEventListener('mousemove', handleMouseMove);
+            };
 
         }, heroRef);
 
@@ -131,17 +164,17 @@ const HeroSection = ({ content, onPlayTrailer }) => {
                     className="hero-video"
                     poster={content.backdrop}
                 >
-                    {/* High-quality anime/movie trailer videos */}
-                    <source src="https://cdn.coverr.co/videos/coverr-an-animation-of-water-ripples-1820/1080p.mp4" type="video/mp4" />
+                    {/* High-quality background video */}
+                    <source src="https://cdn.coverr.co/videos/coverr-an-animation-of-glowing-particles-5663/1080p.mp4" type="video/mp4" />
                 </video>
-                {/* Fallback image if video doesn't load */}
+                {/* Fallback image */}
                 <div
                     className="hero-bg-fallback"
                     style={{ backgroundImage: `url(${content.backdrop})` }}
                 ></div>
             </div>
 
-            {/* Gradient Overlays */}
+            {/* Dark Overlay for readability */}
             <div ref={overlayRef} className="hero-overlay">
                 <div className="hero-gradient"></div>
                 <div className="hero-gradient-bottom"></div>
@@ -151,19 +184,19 @@ const HeroSection = ({ content, onPlayTrailer }) => {
             {/* Animated Particles/Grain */}
             <div className="hero-noise"></div>
 
-            {/* Floating movie posters in background (like the screenshot) */}
+            {/* Floating movie posters */}
             <div className="hero-posters-container">
                 <div className="hero-posters">
-                    <img src="https://image.tmdb.org/t/p/w300/qNBAXBIQlnOThrVvA6mA2B5ber9.jpg" alt="" className="floating-poster" />
-                    <img src="https://image.tmdb.org/t/p/w300/pFlaoHTZeyNkG83vxsAJiGzfSsa.jpg" alt="" className="floating-poster" />
-                    <img src="https://image.tmdb.org/t/p/w300/8UlWHLMpgZm9bx6QYh0NFoq67TZ.jpg" alt="" className="floating-poster" />
-                    <img src="https://image.tmdb.org/t/p/w300/7WsyChQLEftFiDOVTGkv3hFpyyt.jpg" alt="" className="floating-poster" />
-                    <img src="https://image.tmdb.org/t/p/w300/vZloFAK7NmvMGKE7VT39b0rA8JB.jpg" alt="" className="floating-poster" />
-                    <img src="https://image.tmdb.org/t/p/w300/1g0dhYtq4irTY1GPXvft6k4YLjm.jpg" alt="" className="floating-poster" />
+                    <img src="https://image.tmdb.org/t/p/w300/qNBAXBIQlnOThrVvA6mA2B5ber9.jpg" alt="" className="floating-poster" loading="lazy" />
+                    <img src="https://image.tmdb.org/t/p/w300/pFlaoHTZeyNkG83vxsAJiGzfSsa.jpg" alt="" className="floating-poster" loading="lazy" />
+                    <img src="https://image.tmdb.org/t/p/w300/8UlWHLMpgZm9bx6QYh0NFoq67TZ.jpg" alt="" className="floating-poster" loading="lazy" />
+                    <img src="https://image.tmdb.org/t/p/w300/7WsyChQLEftFiDOVTGkv3hFpyyt.jpg" alt="" className="floating-poster" loading="lazy" />
+                    <img src="https://image.tmdb.org/t/p/w300/vZloFAK7NmvMGKE7VT39b0rA8JB.jpg" alt="" className="floating-poster" loading="lazy" />
+                    <img src="https://image.tmdb.org/t/p/w300/1g0dhYtq4irTY1GPXvft6k4YLjm.jpg" alt="" className="floating-poster" loading="lazy" />
                 </div>
             </div>
 
-            {/* Content */}
+            {/* Content - Floats with mouse */}
             <div ref={contentRef} className="hero-content container">
                 {/* Badges */}
                 <div ref={badgesRef} className="hero-badges">
@@ -219,7 +252,7 @@ const HeroSection = ({ content, onPlayTrailer }) => {
                     </MagneticButton>
                 </div>
 
-                {/* Slide indicators (like in the screenshot) */}
+                {/* Slide indicators */}
                 <div className="hero-indicators">
                     <span className="indicator active"></span>
                     <span className="indicator"></span>

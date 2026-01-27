@@ -1,40 +1,56 @@
 import { useState, useEffect, useRef } from 'react';
-import { Link, useLocation } from 'react-router-dom';
 import { gsap } from 'gsap';
 import './Navbar.css';
 
-const Navbar = () => {
+const Navbar = ({ scrollToSection, isSinglePage = false }) => {
     const [isScrolled, setIsScrolled] = useState(false);
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+    const [activeSection, setActiveSection] = useState('home');
     const navRef = useRef(null);
-    const location = useLocation();
 
     useEffect(() => {
         // Animate navbar on mount
         gsap.fromTo(navRef.current,
             { y: -100, opacity: 0 },
-            { y: 0, opacity: 1, duration: 0.8, ease: 'power3.out' }
+            { y: 0, opacity: 1, duration: 0.8, ease: 'power3.out', delay: 0.5 }
         );
 
-        // Handle scroll
+        // Handle scroll for styling and active section
         const handleScroll = () => {
             setIsScrolled(window.scrollY > 50);
+
+            // Detect active section
+            if (isSinglePage) {
+                const sections = ['home', 'trending', 'movies', 'anime', 'new', 'top-rated'];
+                for (const section of sections) {
+                    const element = document.getElementById(section);
+                    if (element) {
+                        const rect = element.getBoundingClientRect();
+                        if (rect.top <= 120 && rect.bottom >= 120) {
+                            setActiveSection(section);
+                            break;
+                        }
+                    }
+                }
+            }
         };
 
         window.addEventListener('scroll', handleScroll);
         return () => window.removeEventListener('scroll', handleScroll);
-    }, []);
-
-    // Close mobile menu on route change
-    useEffect(() => {
-        setIsMobileMenuOpen(false);
-    }, [location]);
+    }, [isSinglePage]);
 
     const navLinks = [
-        { path: '/', label: 'Home' },
-        { path: '/movies', label: 'Movies' },
-        { path: '/anime', label: 'Anime' },
+        { id: 'home', label: 'Home' },
+        { id: 'trending', label: 'Trending' },
+        { id: 'movies', label: 'Movies' },
+        { id: 'anime', label: 'Anime' },
     ];
+
+    const handleNavClick = (e, sectionId) => {
+        e.preventDefault();
+        scrollToSection(sectionId);
+        setIsMobileMenuOpen(false);
+    };
 
     return (
         <nav
@@ -43,7 +59,11 @@ const Navbar = () => {
         >
             <div className="navbar-container">
                 {/* Logo */}
-                <Link to="/" className="navbar-logo">
+                <a
+                    href="#home"
+                    className="navbar-logo"
+                    onClick={(e) => handleNavClick(e, 'home')}
+                >
                     <div className="logo-icon">
                         <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                             <path d="M4 8L12 4L20 8V16L12 20L4 16V8Z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
@@ -55,19 +75,20 @@ const Navbar = () => {
                     <span className="logo-text">
                         Stream<span className="text-gradient">Verse</span>
                     </span>
-                </Link>
+                </a>
 
                 {/* Desktop Navigation */}
                 <ul className="navbar-links">
                     {navLinks.map((link) => (
-                        <li key={link.path}>
-                            <Link
-                                to={link.path}
-                                className={`nav-link ${location.pathname === link.path ? 'active' : ''}`}
+                        <li key={link.id}>
+                            <a
+                                href={`#${link.id}`}
+                                className={`nav-link ${activeSection === link.id ? 'active' : ''}`}
+                                onClick={(e) => handleNavClick(e, link.id)}
                             >
                                 {link.label}
                                 <span className="nav-link-underline"></span>
-                            </Link>
+                            </a>
                         </li>
                     ))}
                 </ul>
@@ -110,13 +131,14 @@ const Navbar = () => {
             <div className={`mobile-menu ${isMobileMenuOpen ? 'open' : ''}`}>
                 <ul className="mobile-nav-links">
                     {navLinks.map((link) => (
-                        <li key={link.path}>
-                            <Link
-                                to={link.path}
-                                className={`mobile-nav-link ${location.pathname === link.path ? 'active' : ''}`}
+                        <li key={link.id}>
+                            <a
+                                href={`#${link.id}`}
+                                className={`mobile-nav-link ${activeSection === link.id ? 'active' : ''}`}
+                                onClick={(e) => handleNavClick(e, link.id)}
                             >
                                 {link.label}
-                            </Link>
+                            </a>
                         </li>
                     ))}
                 </ul>

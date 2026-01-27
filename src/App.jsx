@@ -1,22 +1,29 @@
 import { useState, useEffect, useRef } from 'react';
-import { Routes, Route, useLocation } from 'react-router-dom';
 import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
+import { ScrollToPlugin } from 'gsap/ScrollToPlugin';
 
 // Components
 import Navbar from './components/Navbar/Navbar';
 import Footer from './components/Footer/Footer';
 import LoadingScreen from './components/LoadingScreen/LoadingScreen';
 import CustomCursor from './components/CustomCursor/CustomCursor';
+import HeroSection from './components/HeroSection/HeroSection';
+import ContentSection from './components/ContentSection/ContentSection';
+import TrailerModal from './components/TrailerModal/TrailerModal';
 
-// Pages
-import Home from './pages/Home';
-import Movies from './pages/Movies';
-import Anime from './pages/Anime';
-import Details from './pages/Details';
+// Data
+import {
+    featuredContent,
+    trendingNow,
+    popularAnime,
+    newReleases,
+    topRatedMovies,
+    allContent
+} from './data/mockData';
 
 // Register GSAP plugins
-gsap.registerPlugin(ScrollTrigger);
+gsap.registerPlugin(ScrollTrigger, ScrollToPlugin);
 
 // Set GSAP defaults for performance
 gsap.config({
@@ -26,52 +33,43 @@ gsap.config({
 
 function App() {
     const [isLoading, setIsLoading] = useState(true);
-    const location = useLocation();
+    const [trailerContent, setTrailerContent] = useState(null);
+    const [isTrailerOpen, setIsTrailerOpen] = useState(false);
     const mainRef = useRef(null);
 
     // Initial loading
     useEffect(() => {
         const timer = setTimeout(() => {
             setIsLoading(false);
-        }, 2500);
+        }, 2000);
 
         return () => clearTimeout(timer);
     }, []);
 
-    // Page transition animation
+    // Initialize ScrollTrigger after loading
     useEffect(() => {
-        if (!isLoading && mainRef.current) {
-            // Kill any existing ScrollTriggers before creating new ones
-            ScrollTrigger.getAll().forEach(trigger => trigger.kill());
-
-            // Page entrance animation
-            const tl = gsap.timeline();
-
-            tl.fromTo(mainRef.current,
-                {
-                    opacity: 0,
-                    y: 30,
-                    scale: 0.98
-                },
-                {
-                    opacity: 1,
-                    y: 0,
-                    scale: 1,
-                    duration: 0.6,
-                    ease: 'power3.out',
-                    force3D: true
-                }
-            );
-
-            // Scroll to top on route change
-            window.scrollTo({ top: 0, behavior: 'instant' });
-
-            // Refresh ScrollTrigger after route change
-            setTimeout(() => {
-                ScrollTrigger.refresh();
-            }, 100);
+        if (!isLoading) {
+            ScrollTrigger.refresh();
         }
-    }, [location.pathname, isLoading]);
+    }, [isLoading]);
+
+    const handlePlayTrailer = (content) => {
+        setTrailerContent(content);
+        setIsTrailerOpen(true);
+    };
+
+    const handleCloseTrailer = () => {
+        setIsTrailerOpen(false);
+    };
+
+    // Smooth scroll to section
+    const scrollToSection = (sectionId) => {
+        gsap.to(window, {
+            duration: 1.2,
+            scrollTo: { y: `#${sectionId}`, offsetY: 80 },
+            ease: 'power3.inOut'
+        });
+    };
 
     return (
         <div className="app">
@@ -81,21 +79,74 @@ function App() {
             {/* Loading Screen */}
             <LoadingScreen isLoading={isLoading} />
 
-            {/* Navigation */}
-            <Navbar />
+            {/* Navigation - Pass scrollToSection for single-page nav */}
+            <Navbar scrollToSection={scrollToSection} isSinglePage={true} />
 
-            {/* Main Content */}
-            <main ref={mainRef} key={location.pathname}>
-                <Routes>
-                    <Route path="/" element={<Home />} />
-                    <Route path="/movies" element={<Movies />} />
-                    <Route path="/anime" element={<Anime />} />
-                    <Route path="/details/:id" element={<Details />} />
-                </Routes>
+            {/* Main Content - Single Page */}
+            <main ref={mainRef} className="main-content">
+                {/* Hero Section */}
+                <section id="home">
+                    <HeroSection
+                        content={featuredContent}
+                        onPlayTrailer={handlePlayTrailer}
+                    />
+                </section>
+
+                {/* Trending Section */}
+                <ContentSection
+                    id="trending"
+                    title="🔥 Trending Now"
+                    subtitle="The most popular content this week"
+                    items={trendingNow}
+                    layout="slider"
+                />
+
+                {/* Movies Section */}
+                <ContentSection
+                    id="movies"
+                    title="🎬 Movies"
+                    subtitle="Blockbuster hits and hidden gems"
+                    items={allContent.filter(item => item.type === 'movie')}
+                    layout="grid"
+                />
+
+                {/* Anime Section */}
+                <ContentSection
+                    id="anime"
+                    title="🎌 Anime"
+                    subtitle="Best anime from around the world"
+                    items={popularAnime}
+                    layout="grid"
+                />
+
+                {/* New Releases */}
+                <ContentSection
+                    id="new"
+                    title="🆕 New Releases"
+                    subtitle="Fresh content added this week"
+                    items={newReleases}
+                    layout="slider"
+                />
+
+                {/* Top Rated */}
+                <ContentSection
+                    id="top-rated"
+                    title="⭐ Top Rated"
+                    subtitle="Critically acclaimed masterpieces"
+                    items={topRatedMovies}
+                    layout="slider"
+                />
             </main>
 
             {/* Footer */}
             <Footer />
+
+            {/* Trailer Modal */}
+            <TrailerModal
+                content={trailerContent}
+                isOpen={isTrailerOpen}
+                onClose={handleCloseTrailer}
+            />
         </div>
     );
 }

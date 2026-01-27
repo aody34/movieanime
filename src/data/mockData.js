@@ -247,6 +247,9 @@ export const allMovies = [...trendingNow.filter(m => m.type === 'movie'), ...new
 // All anime combined
 export const allAnime = [...trendingNow.filter(m => m.type === 'anime'), ...popularAnime];
 
+// All content combined
+export const allContent = [featuredContent, ...trendingNow, ...popularAnime, ...newReleases, ...topRatedMovies];
+
 // Get content by ID
 export const getContentById = (id) => {
     const allContent = [featuredContent, ...trendingNow, ...popularAnime, ...newReleases, ...topRatedMovies];
