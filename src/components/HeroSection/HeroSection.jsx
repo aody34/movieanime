@@ -227,24 +227,21 @@ const HeroSection = ({ content, onPlayTrailer }) => {
                 {/* Description */}
                 <p ref={descRef} className="hero-description">{content.description}</p>
 
-                {/* Buttons with Magnetic Effect */}
+                {/* Buttons with Magnetic Effect - Animation Only */}
                 <div ref={buttonsRef} className="hero-buttons">
-                    <MagneticButton
-                        className="btn btn-primary btn-glow"
-                        onClick={() => onPlayTrailer?.(content)}
-                    >
+                    <MagneticButton className="btn btn-primary btn-glow demo-only">
                         <svg viewBox="0 0 24 24" fill="currentColor" width="20" height="20">
                             <path d="M8 5V19L19 12L8 5Z" />
                         </svg>
                         Watch Now
                     </MagneticButton>
-                    <MagneticButton className="btn btn-secondary btn-glass">
+                    <MagneticButton className="btn btn-secondary btn-glass demo-only">
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" width="20" height="20">
                             <path d="M12 5V19M5 12H19" />
                         </svg>
                         Add to List
                     </MagneticButton>
-                    <MagneticButton className="btn btn-icon btn-glass" aria-label="More info">
+                    <MagneticButton className="btn btn-icon btn-glass demo-only" aria-label="More info">
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" width="20" height="20">
                             <circle cx="12" cy="12" r="10" />
                             <path d="M12 16V12M12 8H12.01" />

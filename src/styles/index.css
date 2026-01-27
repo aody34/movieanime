@@ -101,6 +101,25 @@ body {
   -moz-osx-font-smoothing: grayscale;
 }
 
+/* Demo mode - animation only, no click functionality */
+.demo-only {
+  cursor: default !important;
+}
+
+.demo-only.btn,
+.demo-only .btn,
+.movie-card-link.demo-only {
+  cursor: default !important;
+}
+
+/* Prevent actual navigation/action but keep hover effects */
+.demo-only.btn::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: 100;
+}
+
 /* Performance optimizations for mobile */
 @media (hover: none) and (pointer: coarse) {
 

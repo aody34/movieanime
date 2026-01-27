@@ -139,9 +139,8 @@ const MovieCard = ({ movie, index = 0, onClick }) => {
 
     return (
         <div
-            className="movie-card-link"
-            style={{ '--delay': `${index * 0.1}s` }}
-            onClick={() => onClick?.(movie)}
+            className="movie-card-link demo-only"
+            style={{ '--delay': `${index * 0.1}s`, cursor: 'default' }}
         >
             <div
                 ref={cardRef}
