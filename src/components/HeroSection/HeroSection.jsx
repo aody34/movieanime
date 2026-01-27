@@ -10,7 +10,7 @@ const HeroSection = ({ content, onPlayTrailer }) => {
     const descRef = useRef(null);
     const buttonsRef = useRef(null);
     const badgesRef = useRef(null);
-    const bgRef = useRef(null);
+    const videoRef = useRef(null);
     const overlayRef = useRef(null);
 
     useEffect(() => {
@@ -26,8 +26,8 @@ const HeroSection = ({ content, onPlayTrailer }) => {
                 y: 60
             });
 
-            // Background reveal with zoom
-            masterTl.fromTo(bgRef.current,
+            // Video reveal with zoom
+            masterTl.fromTo(videoRef.current,
                 { scale: 1.3, opacity: 0 },
                 { scale: 1, opacity: 1, duration: 2, ease: 'power2.out' }
             );
@@ -87,17 +87,8 @@ const HeroSection = ({ content, onPlayTrailer }) => {
                 '-=0.4'
             );
 
-            // Continuous Ken Burns effect on background
-            gsap.to(bgRef.current, {
-                scale: 1.1,
-                duration: 20,
-                ease: 'none',
-                repeat: -1,
-                yoyo: true
-            });
-
-            // Parallax effect on scroll
-            gsap.to(bgRef.current, {
+            // Parallax effect on scroll for video
+            gsap.to(videoRef.current, {
                 yPercent: 20,
                 ease: 'none',
                 scrollTrigger: {
@@ -108,7 +99,7 @@ const HeroSection = ({ content, onPlayTrailer }) => {
                 }
             });
 
-            // Content parallax (moves slower than bg)
+            // Content parallax (moves slower than video)
             gsap.to(contentRef.current, {
                 yPercent: -10,
                 opacity: 0.5,
@@ -130,12 +121,25 @@ const HeroSection = ({ content, onPlayTrailer }) => {
 
     return (
         <section ref={heroRef} className="hero-section">
-            {/* Background Image with Ken Burns */}
-            <div
-                ref={bgRef}
-                className="hero-bg"
-                style={{ backgroundImage: `url(${content.backdrop})` }}
-            ></div>
+            {/* Animated Video Background */}
+            <div ref={videoRef} className="hero-video-container">
+                <video
+                    autoPlay
+                    muted
+                    loop
+                    playsInline
+                    className="hero-video"
+                    poster={content.backdrop}
+                >
+                    {/* High-quality anime/movie trailer videos */}
+                    <source src="https://cdn.coverr.co/videos/coverr-an-animation-of-water-ripples-1820/1080p.mp4" type="video/mp4" />
+                </video>
+                {/* Fallback image if video doesn't load */}
+                <div
+                    className="hero-bg-fallback"
+                    style={{ backgroundImage: `url(${content.backdrop})` }}
+                ></div>
+            </div>
 
             {/* Gradient Overlays */}
             <div ref={overlayRef} className="hero-overlay">
@@ -146,6 +150,18 @@ const HeroSection = ({ content, onPlayTrailer }) => {
 
             {/* Animated Particles/Grain */}
             <div className="hero-noise"></div>
+
+            {/* Floating movie posters in background (like the screenshot) */}
+            <div className="hero-posters-container">
+                <div className="hero-posters">
+                    <img src="https://image.tmdb.org/t/p/w300/qNBAXBIQlnOThrVvA6mA2B5ber9.jpg" alt="" className="floating-poster" />
+                    <img src="https://image.tmdb.org/t/p/w300/pFlaoHTZeyNkG83vxsAJiGzfSsa.jpg" alt="" className="floating-poster" />
+                    <img src="https://image.tmdb.org/t/p/w300/8UlWHLMpgZm9bx6QYh0NFoq67TZ.jpg" alt="" className="floating-poster" />
+                    <img src="https://image.tmdb.org/t/p/w300/7WsyChQLEftFiDOVTGkv3hFpyyt.jpg" alt="" className="floating-poster" />
+                    <img src="https://image.tmdb.org/t/p/w300/vZloFAK7NmvMGKE7VT39b0rA8JB.jpg" alt="" className="floating-poster" />
+                    <img src="https://image.tmdb.org/t/p/w300/1g0dhYtq4irTY1GPXvft6k4YLjm.jpg" alt="" className="floating-poster" />
+                </div>
+            </div>
 
             {/* Content */}
             <div ref={contentRef} className="hero-content container">
@@ -201,6 +217,13 @@ const HeroSection = ({ content, onPlayTrailer }) => {
                             <path d="M12 16V12M12 8H12.01" />
                         </svg>
                     </MagneticButton>
+                </div>
+
+                {/* Slide indicators (like in the screenshot) */}
+                <div className="hero-indicators">
+                    <span className="indicator active"></span>
+                    <span className="indicator"></span>
+                    <span className="indicator"></span>
                 </div>
             </div>
 
