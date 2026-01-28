@@ -23,15 +23,15 @@ const ContentSection = ({ id, title, subtitle, items, layout = 'slider' }) => {
                     // === TITLE ANIMATION ===
                     if (titleRef.current) {
                         gsap.fromTo(titleRef.current,
-                            { x: -50, opacity: 0 },
+                            { x: -30, opacity: 0 },
                             {
                                 x: 0,
                                 opacity: 1,
-                                duration: 0.8,
-                                ease: 'power3.out',
+                                duration: 1,
+                                ease: 'power4.out',
                                 scrollTrigger: {
                                     trigger: sectionRef.current,
-                                    start: 'top 85%',
+                                    start: 'top 80%',
                                     toggleActions: 'play none none none'
                                 }
                             }
@@ -41,15 +41,16 @@ const ContentSection = ({ id, title, subtitle, items, layout = 'slider' }) => {
                     // === SUBTITLE ANIMATION ===
                     if (subtitleRef.current) {
                         gsap.fromTo(subtitleRef.current,
-                            { y: 20, opacity: 0 },
+                            { y: 30, opacity: 0 },
                             {
                                 y: 0,
                                 opacity: 1,
-                                duration: 0.6,
-                                delay: 0.2,
+                                duration: 1,
+                                delay: 0.1,
+                                ease: 'power3.out',
                                 scrollTrigger: {
                                     trigger: sectionRef.current,
-                                    start: 'top 85%',
+                                    start: 'top 80%',
                                     toggleActions: 'play none none none'
                                 }
                             }
@@ -60,17 +61,17 @@ const ContentSection = ({ id, title, subtitle, items, layout = 'slider' }) => {
                     const cards = gridRef.current?.querySelectorAll('.movie-card-link');
                     if (cards?.length) {
                         gsap.fromTo(cards,
-                            { y: 60, opacity: 0, scale: 0.9 },
+                            { y: 100, opacity: 0, scale: 0.95 },
                             {
                                 y: 0,
                                 opacity: 1,
                                 scale: 1,
-                                duration: 0.6,
-                                stagger: 0.08,
-                                ease: 'back.out(1.4)',
+                                duration: 0.8,
+                                stagger: 0.1,
+                                ease: 'power3.out', // Smoother, less bouncy
                                 scrollTrigger: {
                                     trigger: gridRef.current,
-                                    start: 'top 90%',
+                                    start: 'top 85%',
                                     toggleActions: 'play none none none'
                                 }
                             }
