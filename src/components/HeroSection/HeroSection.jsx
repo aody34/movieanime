@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState, useCallback } from 'react';
 import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import MagneticButton from '../MagneticButton/MagneticButton';
@@ -14,11 +14,57 @@ const HeroSection = ({ content }) => {
     const descRef = useRef(null);
     const buttonsRef = useRef(null);
     const badgesRef = useRef(null);
-    const videoRef = useRef(null);
-    const videoElementRef = useRef(null);
+    const bgContainerRef = useRef(null);
     const overlayRef = useRef(null);
+
+    const [activeIndex, setActiveIndex] = useState(0);
     const [isLowEndDevice, setIsLowEndDevice] = useState(false);
-    const [videoLoaded, setVideoLoaded] = useState(false);
+
+    // Ensure content is always an array
+    const contentArray = Array.isArray(content) ? content : [content];
+    const currentContent = contentArray[activeIndex] || contentArray[0];
+
+    // Auto-rotate featured content
+    useEffect(() => {
+        if (contentArray.length <= 1) return;
+
+        const interval = setInterval(() => {
+            setActiveIndex(prev => (prev + 1) % contentArray.length);
+        }, 8000); // Change every 8 seconds
+
+        return () => clearInterval(interval);
+    }, [contentArray.length]);
+
+    // Handle indicator click
+    const handleIndicatorClick = useCallback((index) => {
+        if (index === activeIndex) return;
+        setActiveIndex(index);
+    }, [activeIndex]);
+
+    // Cross-fade animation when content changes
+    useEffect(() => {
+        if (!contentRef.current) return;
+
+        // Animate content out and in
+        const tl = gsap.timeline();
+
+        // Fade out current content
+        tl.to([titleRef.current, descRef.current], {
+            opacity: 0,
+            y: -20,
+            duration: 0.3,
+            stagger: 0.1
+        });
+
+        // Fade in new content
+        tl.to([titleRef.current, descRef.current], {
+            opacity: 1,
+            y: 0,
+            duration: 0.5,
+            stagger: 0.1
+        });
+
+    }, [activeIndex]);
 
     // Detect low-end devices
     useEffect(() => {
@@ -32,16 +78,14 @@ const HeroSection = ({ content }) => {
         checkDevice();
     }, []);
 
+    // Initial animations
     useEffect(() => {
-        // Safety check - ensure elements exist before animating
         if (!heroRef.current || !contentRef.current) return;
 
         const ctx = gsap.context(() => {
-            // Master timeline for cinematic entrance
             const masterTl = gsap.timeline({
                 defaults: { ease: 'power4.out', force3D: true },
                 onComplete: () => {
-                    // Ensure everything is visible after animation
                     gsap.set([
                         titleRef.current,
                         subtitleRef.current,
@@ -52,29 +96,17 @@ const HeroSection = ({ content }) => {
                 }
             });
 
-            // === CINEMATIC INTRO SEQUENCE ===
-
-            // 1. Video reveal with dramatic zoom
-            masterTl.fromTo(videoRef.current,
-                {
-                    scale: 1.5,
-                    opacity: 0,
-                    filter: 'blur(20px)'
-                },
-                {
-                    scale: 1,
-                    opacity: 1,
-                    filter: 'blur(0px)',
-                    duration: 2.5,
-                    ease: 'power2.out'
-                }
+            // Background reveal
+            masterTl.fromTo(bgContainerRef.current,
+                { scale: 1.2, opacity: 0 },
+                { scale: 1, opacity: 1, duration: 2, ease: 'power2.out' }
             );
 
-            // 2. Cinematic letterbox effect (top/bottom bars slide out)
+            // Letterbox bars
             masterTl.fromTo('.hero-letterbox-top',
                 { scaleY: 1 },
                 { scaleY: 0, duration: 1.5, ease: 'power3.inOut' },
-                '-=2'
+                '-=1.5'
             );
             masterTl.fromTo('.hero-letterbox-bottom',
                 { scaleY: 1 },
@@ -82,131 +114,78 @@ const HeroSection = ({ content }) => {
                 '-=1.5'
             );
 
-            // 3. Overlay gradient reveal
+            // Overlay reveal
             masterTl.fromTo(overlayRef.current,
                 { opacity: 0 },
                 { opacity: 1, duration: 1.2 },
                 '-=1.5'
             );
 
-            // 4. Badges stagger entrance with glow
-            masterTl.to(badgesRef.current?.children || [], {
-                y: 0,
-                opacity: 1,
-                duration: 0.8,
-                stagger: 0.12,
-                ease: 'back.out(1.5)'
-            }, '-=0.8');
-
-            // 5. Title dramatic reveal with split effect
-            masterTl.fromTo(titleRef.current,
-                {
-                    y: 120,
-                    opacity: 0,
-                    clipPath: 'inset(100% 0 0 0)',
-                    skewY: 5,
-                    rotateX: -20
-                },
-                {
-                    y: 0,
-                    opacity: 1,
-                    clipPath: 'inset(0% 0 0 0)',
-                    skewY: 0,
-                    rotateX: 0,
-                    duration: 1.4,
-                    ease: 'power4.out'
-                },
-                '-=0.4'
-            );
-
-            // 6. Subtitle with typewriter-like reveal
-            masterTl.fromTo(subtitleRef.current,
-                {
-                    y: 40,
-                    opacity: 0,
-                    letterSpacing: '0.5em'
-                },
-                {
-                    y: 0,
-                    opacity: 1,
-                    letterSpacing: '0.2em',
-                    duration: 1,
-                    ease: 'power3.out'
-                },
+            // Badges
+            masterTl.fromTo(badgesRef.current?.children || [],
+                { y: 30, opacity: 0 },
+                { y: 0, opacity: 1, duration: 0.8, stagger: 0.12, ease: 'back.out(1.5)' },
                 '-=0.8'
             );
 
-            // 7. Description fade up
-            masterTl.to(descRef.current, {
-                y: 0,
-                opacity: 1,
-                duration: 0.8
-            }, '-=0.5');
+            // Title
+            masterTl.fromTo(titleRef.current,
+                { y: 80, opacity: 0, clipPath: 'inset(100% 0 0 0)' },
+                { y: 0, opacity: 1, clipPath: 'inset(0% 0 0 0)', duration: 1.2 },
+                '-=0.4'
+            );
 
-            // 8. Buttons cinematic stagger with scale bounce
+            // Subtitle
+            masterTl.fromTo(subtitleRef.current,
+                { y: 30, opacity: 0 },
+                { y: 0, opacity: 1, duration: 0.8 },
+                '-=0.8'
+            );
+
+            // Description
+            masterTl.fromTo(descRef.current,
+                { y: 20, opacity: 0 },
+                { y: 0, opacity: 1, duration: 0.8 },
+                '-=0.5'
+            );
+
+            // Buttons
             masterTl.fromTo(buttonsRef.current?.children || [],
-                {
-                    y: 50,
-                    opacity: 0,
-                    scale: 0.7,
-                    rotateY: -15
-                },
-                {
-                    y: 0,
-                    opacity: 1,
-                    scale: 1,
-                    rotateY: 0,
-                    duration: 0.7,
-                    stagger: 0.15,
-                    ease: 'back.out(2)'
-                },
+                { y: 40, opacity: 0, scale: 0.8 },
+                { y: 0, opacity: 1, scale: 1, duration: 0.6, stagger: 0.12, ease: 'back.out(2)' },
                 '-=0.3'
             );
 
-            // === INTERACTIVE EFFECTS ===
-
-            // Mouse-follow floating text effect (only on non-low-end)
+            // Mouse parallax (desktop only)
             if (!isLowEndDevice) {
                 const handleMouseMove = (e) => {
                     const { clientX, clientY } = e;
                     const { innerWidth, innerHeight } = window;
-
                     const xPercent = (clientX / innerWidth - 0.5) * 2;
                     const yPercent = (clientY / innerHeight - 0.5) * 2;
 
                     gsap.to(contentRef.current, {
-                        x: xPercent * 20,
-                        y: yPercent * 15,
-                        rotateY: xPercent * 2,
-                        rotateX: -yPercent * 2,
+                        x: xPercent * 15,
+                        y: yPercent * 10,
                         duration: 1,
-                        ease: 'power2.out',
-                        force3D: true
+                        ease: 'power2.out'
                     });
 
-                    // Video subtle counter-movement
-                    gsap.to(videoRef.current, {
-                        x: xPercent * -10,
-                        y: yPercent * -8,
+                    gsap.to(bgContainerRef.current, {
+                        x: xPercent * -8,
+                        y: yPercent * -5,
                         duration: 1.2,
-                        ease: 'power2.out',
-                        force3D: true
+                        ease: 'power2.out'
                     });
                 };
 
                 window.addEventListener('mousemove', handleMouseMove);
-
-                // Cleanup
-                return () => {
-                    window.removeEventListener('mousemove', handleMouseMove);
-                };
+                return () => window.removeEventListener('mousemove', handleMouseMove);
             }
 
-            // === SCROLL EFFECTS ===
-
-            // Parallax zoom on scroll
-            gsap.to(videoRef.current, {
-                yPercent: 30,
+            // Scroll parallax
+            gsap.to(bgContainerRef.current, {
+                yPercent: 20,
                 scale: 1.1,
                 ease: 'none',
                 scrollTrigger: {
@@ -217,9 +196,8 @@ const HeroSection = ({ content }) => {
                 }
             });
 
-            // Content parallax with fade
             gsap.to(contentRef.current, {
-                yPercent: -20,
+                yPercent: -15,
                 opacity: 0,
                 ease: 'none',
                 scrollTrigger: {
@@ -233,14 +211,9 @@ const HeroSection = ({ content }) => {
         }, heroRef);
 
         return () => ctx.revert();
-    }, [content, isLowEndDevice]);
+    }, [isLowEndDevice]);
 
-    // Handle video load
-    const handleVideoLoad = () => {
-        setVideoLoaded(true);
-    };
-
-    if (!content) return null;
+    if (!currentContent) return null;
 
     return (
         <section ref={heroRef} className="hero-section">
@@ -248,38 +221,16 @@ const HeroSection = ({ content }) => {
             <div className="hero-letterbox-top"></div>
             <div className="hero-letterbox-bottom"></div>
 
-            {/* Animated Video Background */}
-            <div ref={videoRef} className="hero-video-container">
-                {/* Main Video - Multiple sources for compatibility */}
-                <video
-                    ref={videoElementRef}
-                    autoPlay
-                    muted
-                    loop
-                    playsInline
-                    preload="auto"
-                    className={`hero-video ${videoLoaded ? 'loaded' : ''}`}
-                    poster={content.backdrop}
-                    onLoadedData={handleVideoLoad}
-                >
-                    {/* High quality cinematic anime video */}
-                    <source
-                        src="https://cdn.coverr.co/videos/coverr-ink-in-water-1582/1080p.mp4"
-                        type="video/mp4"
+            {/* Dynamic Background Images - Cross-fade */}
+            <div ref={bgContainerRef} className="hero-bg-container">
+                {contentArray.map((item, index) => (
+                    <div
+                        key={item.id}
+                        className={`hero-bg-slide ${index === activeIndex ? 'active' : ''}`}
+                        style={{ backgroundImage: `url(${item.backdrop})` }}
                     />
-                </video>
-
-                {/* Fallback poster image for slow devices */}
-                <div
-                    className="hero-fallback-image"
-                    style={{
-                        backgroundImage: `url(${content.backdrop})`,
-                        opacity: videoLoaded ? 0 : 1
-                    }}
-                ></div>
-
-                {/* Animated gradient overlay */}
-                <div className="hero-video-gradient"></div>
+                ))}
+                <div className="hero-bg-gradient"></div>
             </div>
 
             {/* Cinematic Overlays */}
@@ -290,10 +241,10 @@ const HeroSection = ({ content }) => {
                 <div className="hero-scanlines"></div>
             </div>
 
-            {/* Animated Film Grain */}
+            {/* Film Grain */}
             <div className="hero-noise"></div>
 
-            {/* Floating Particles (disabled on low-end) */}
+            {/* Particles */}
             {!isLowEndDevice && (
                 <div className="hero-particles">
                     <div className="particle"></div>
@@ -316,32 +267,35 @@ const HeroSection = ({ content }) => {
                         <svg viewBox="0 0 24 24" fill="currentColor" width="14" height="14">
                             <path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z" />
                         </svg>
-                        {content.rating}
+                        {currentContent.rating}
                     </span>
-                    <span className="badge badge-year">{content.year}</span>
-                    <span className="badge badge-duration">{content.duration}</span>
+                    <span className="badge badge-year">{currentContent.year}</span>
+                    <span className="badge badge-duration">{currentContent.duration}</span>
+                    <span className={`badge badge-type ${currentContent.type}`}>
+                        {currentContent.type === 'anime' ? '🎌 Anime' : '🎬 Movie'}
+                    </span>
                 </div>
 
-                {/* Subtitle / Tagline */}
+                {/* Subtitle */}
                 <p ref={subtitleRef} className="hero-subtitle">
                     EXPERIENCE THE ULTIMATE STREAMING
                 </p>
 
                 {/* Title */}
                 <h1 ref={titleRef} className="hero-title">
-                    {content.title}
+                    {currentContent.title}
                 </h1>
 
                 {/* Genres */}
                 <div className="hero-genres">
-                    {content.genres?.map((genre, index) => (
+                    {currentContent.genres?.map((genre, index) => (
                         <span key={index} className="hero-genre">{genre}</span>
                     ))}
                 </div>
 
                 {/* Description */}
                 <p ref={descRef} className="hero-description">
-                    {content.description}
+                    {currentContent.description}
                 </p>
 
                 {/* CTA Buttons */}
@@ -367,12 +321,16 @@ const HeroSection = ({ content }) => {
                     </MagneticButton>
                 </div>
 
-                {/* Slide Indicators */}
+                {/* Slide Indicators - Now functional */}
                 <div className="hero-indicators">
-                    <span className="indicator active"></span>
-                    <span className="indicator"></span>
-                    <span className="indicator"></span>
-                    <span className="indicator"></span>
+                    {contentArray.map((_, index) => (
+                        <button
+                            key={index}
+                            className={`indicator ${index === activeIndex ? 'active' : ''}`}
+                            onClick={() => handleIndicatorClick(index)}
+                            aria-label={`Go to slide ${index + 1}`}
+                        />
+                    ))}
                 </div>
             </div>
 

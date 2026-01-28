@@ -6,7 +6,11 @@ const Navbar = ({ scrollToSection, isSinglePage = false }) => {
     const [isScrolled, setIsScrolled] = useState(false);
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
     const [activeSection, setActiveSection] = useState('home');
+    const [isSearchOpen, setIsSearchOpen] = useState(false);
     const navRef = useRef(null);
+    const searchRef = useRef(null);
+    const searchInputRef = useRef(null);
+    const searchIconRef = useRef(null);
 
     useEffect(() => {
         // Animate navbar on mount
@@ -14,6 +18,21 @@ const Navbar = ({ scrollToSection, isSinglePage = false }) => {
             { y: -100, opacity: 0 },
             { y: 0, opacity: 1, duration: 0.8, ease: 'power3.out', delay: 0.5 }
         );
+
+        // Search icon pulse animation on load
+        if (searchIconRef.current) {
+            gsap.fromTo(searchIconRef.current,
+                { scale: 1 },
+                {
+                    scale: 1.2,
+                    duration: 0.6,
+                    ease: 'power2.inOut',
+                    repeat: 2,
+                    yoyo: true,
+                    delay: 2
+                }
+            );
+        }
 
         // Handle scroll for styling and active section
         const handleScroll = () => {
@@ -38,6 +57,25 @@ const Navbar = ({ scrollToSection, isSinglePage = false }) => {
         window.addEventListener('scroll', handleScroll);
         return () => window.removeEventListener('scroll', handleScroll);
     }, [isSinglePage]);
+
+    // Handle search toggle
+    const toggleSearch = () => {
+        setIsSearchOpen(!isSearchOpen);
+
+        if (!isSearchOpen) {
+            // Opening animation
+            gsap.fromTo(searchRef.current,
+                { width: 0, opacity: 0 },
+                { width: 280, opacity: 1, duration: 0.4, ease: 'power3.out' }
+            );
+            setTimeout(() => searchInputRef.current?.focus(), 100);
+        } else {
+            // Closing animation
+            gsap.to(searchRef.current,
+                { width: 0, opacity: 0, duration: 0.3, ease: 'power2.in' }
+            );
+        }
+    };
 
     const navLinks = [
         { id: 'home', label: 'Home' },
@@ -95,12 +133,28 @@ const Navbar = ({ scrollToSection, isSinglePage = false }) => {
 
                 {/* Right Section */}
                 <div className="navbar-right">
-                    <button className="navbar-search" aria-label="Search">
-                        <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                            <circle cx="11" cy="11" r="8" stroke="currentColor" strokeWidth="2" />
-                            <path d="M21 21L16.65 16.65" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
-                        </svg>
-                    </button>
+                    {/* Expandable Search Bar */}
+                    <div className={`search-wrapper ${isSearchOpen ? 'open' : ''}`}>
+                        <div ref={searchRef} className="search-input-container">
+                            <input
+                                ref={searchInputRef}
+                                type="text"
+                                placeholder="Search movies, anime..."
+                                className="search-input"
+                            />
+                        </div>
+                        <button
+                            ref={searchIconRef}
+                            className={`navbar-search ${isSearchOpen ? 'active' : ''}`}
+                            onClick={toggleSearch}
+                            aria-label="Search"
+                        >
+                            <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <circle cx="11" cy="11" r="8" stroke="currentColor" strokeWidth="2" />
+                                <path d="M21 21L16.65 16.65" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+                            </svg>
+                        </button>
+                    </div>
 
                     <button className="navbar-notifications" aria-label="Notifications">
                         <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">

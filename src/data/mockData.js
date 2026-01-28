@@ -1,17 +1,57 @@
 // Mock data for movies and anime
-export const featuredContent = {
-    id: 1,
-    title: "Attack on Titan: The Final Season",
-    description: "In a world where humanity lives inside cities surrounded by enormous walls due to the Titans, gigantic humanoid creatures who devour humans seemingly without reason, Eren Yeager discovers an extraordinary power that could be the key to saving his world.",
-    backdrop: "https://images.unsplash.com/photo-1626814026160-2237a95fc5a0?w=1920&q=80",
-    poster: "https://images.unsplash.com/photo-1626814026160-2237a95fc5a0?w=500&q=80",
-    rating: 9.1,
-    year: 2024,
-    duration: "24 min/ep",
-    genres: ["Action", "Drama", "Fantasy"],
-    type: "anime",
-    trailerUrl: "https://www.youtube.com/embed/MGRm4IzK1SQ"
-};
+
+// Featured content array for hero carousel
+export const featuredContent = [
+    {
+        id: 1,
+        title: "Attack on Titan: The Final Season",
+        description: "In a world where humanity lives inside cities surrounded by enormous walls due to the Titans, gigantic humanoid creatures who devour humans seemingly without reason, Eren Yeager discovers an extraordinary power that could be the key to saving his world.",
+        backdrop: "https://images.unsplash.com/photo-1626814026160-2237a95fc5a0?w=1920&q=80",
+        poster: "https://images.unsplash.com/photo-1626814026160-2237a95fc5a0?w=500&q=80",
+        rating: 9.1,
+        year: 2024,
+        duration: "24 min/ep",
+        genres: ["Action", "Drama", "Fantasy"],
+        type: "anime",
+        trailerUrl: "https://www.youtube.com/embed/MGRm4IzK1SQ"
+    },
+    {
+        id: 101,
+        title: "Jujutsu Kaisen: Season 2",
+        description: "Yuji Itadori and his classmates continue their battle against curses while uncovering the dark secrets of the jujutsu world. The Hidden Inventory arc reveals the tragic past that shaped the present conflict.",
+        backdrop: "https://images.unsplash.com/photo-1618336753974-aae8e04506aa?w=1920&q=80",
+        poster: "https://images.unsplash.com/photo-1618336753974-aae8e04506aa?w=500&q=80",
+        rating: 9.3,
+        year: 2024,
+        duration: "24 min/ep",
+        genres: ["Action", "Supernatural", "Horror"],
+        type: "anime"
+    },
+    {
+        id: 102,
+        title: "Dune: Part Two",
+        description: "Paul Atreides unites with Chani and the Fremen while seeking revenge against the conspirators who destroyed his family. Facing a choice between love and the fate of the universe, he must prevent a terrible future.",
+        backdrop: "https://images.unsplash.com/photo-1534447677768-be436bb09401?w=1920&q=80",
+        poster: "https://images.unsplash.com/photo-1534447677768-be436bb09401?w=500&q=80",
+        rating: 8.8,
+        year: 2024,
+        duration: "2h 46m",
+        genres: ["Sci-Fi", "Adventure", "Drama"],
+        type: "movie"
+    },
+    {
+        id: 103,
+        title: "Demon Slayer: Infinity Castle",
+        description: "Tanjiro and the Demon Slayer Corps face their ultimate battle as they infiltrate the Infinity Castle for the final confrontation with Muzan Kibutsuji, the demon king himself.",
+        backdrop: "https://images.unsplash.com/photo-1578632767115-351597cf2477?w=1920&q=80",
+        poster: "https://images.unsplash.com/photo-1578632767115-351597cf2477?w=500&q=80",
+        rating: 9.0,
+        year: 2024,
+        duration: "2h 15m",
+        genres: ["Action", "Fantasy", "Adventure"],
+        type: "anime"
+    }
+];
 
 export const trendingNow = [
     {

@@ -2,21 +2,22 @@ import { useRef, useState } from 'react';
 import { gsap } from 'gsap';
 import './MovieCard.css';
 
-const MovieCard = ({ movie, index = 0, onClick }) => {
+const MovieCard = ({ movie, index = 0 }) => {
     const cardRef = useRef(null);
     const glowRef = useRef(null);
     const imageRef = useRef(null);
     const overlayRef = useRef(null);
+    const infoRef = useRef(null);
     const playBtnRef = useRef(null);
     const [imageLoaded, setImageLoaded] = useState(false);
 
     const handleMouseEnter = () => {
         const card = cardRef.current;
 
-        // Card lift and scale
+        // Card lift and scale - the "popping out" effect
         gsap.to(card, {
             scale: 1.05,
-            y: -10,
+            y: -8,
             duration: 0.4,
             ease: 'power2.out',
             force3D: true
@@ -35,17 +36,23 @@ const MovieCard = ({ movie, index = 0, onClick }) => {
             duration: 0.3
         });
 
+        // Glassmorphism info slides UP from bottom
+        gsap.fromTo(infoRef.current,
+            { y: 100, opacity: 0 },
+            { y: 0, opacity: 1, duration: 0.4, ease: 'power3.out' }
+        );
+
         // Glow effect
         gsap.to(glowRef.current, {
-            opacity: 0.7,
-            scale: 1.2,
+            opacity: 0.8,
+            scale: 1.3,
             duration: 0.4
         });
 
-        // Play button entrance
+        // Play button entrance with bounce
         gsap.fromTo(playBtnRef.current,
-            { scale: 0, opacity: 0 },
-            { scale: 1, opacity: 1, duration: 0.4, ease: 'back.out(2)' }
+            { scale: 0, opacity: 0, rotate: -180 },
+            { scale: 1, opacity: 1, rotate: 0, duration: 0.5, ease: 'back.out(2)' }
         );
     };
 
@@ -75,6 +82,14 @@ const MovieCard = ({ movie, index = 0, onClick }) => {
             duration: 0.3
         });
 
+        // Slide info back down
+        gsap.to(infoRef.current, {
+            y: 100,
+            opacity: 0,
+            duration: 0.3,
+            ease: 'power2.in'
+        });
+
         // Hide glow
         gsap.to(glowRef.current, {
             opacity: 0,
@@ -88,7 +103,8 @@ const MovieCard = ({ movie, index = 0, onClick }) => {
         gsap.to(playBtnRef.current, {
             scale: 0,
             opacity: 0,
-            duration: 0.2
+            rotate: 180,
+            duration: 0.3
         });
     };
 
@@ -102,8 +118,8 @@ const MovieCard = ({ movie, index = 0, onClick }) => {
         const centerY = rect.height / 2;
 
         // 3D tilt effect
-        const rotateX = (y - centerY) / 12;
-        const rotateY = (centerX - x) / 12;
+        const rotateX = (y - centerY) / 15;
+        const rotateY = (centerX - x) / 15;
 
         gsap.to(card, {
             rotateX: rotateX,
@@ -127,15 +143,15 @@ const MovieCard = ({ movie, index = 0, onClick }) => {
     const handleImageLoad = () => {
         setImageLoaded(true);
         gsap.fromTo(imageRef.current,
-            { opacity: 0 },
-            { opacity: 1, duration: 0.5, ease: 'power2.out' }
+            { opacity: 0, scale: 1.1 },
+            { opacity: 1, scale: 1, duration: 0.6, ease: 'power2.out' }
         );
     };
 
     // Get dominant color for glow (simulate based on type)
     const glowColor = movie.type === 'anime'
-        ? 'rgba(139, 92, 246, 0.6)'
-        : 'rgba(229, 9, 20, 0.6)';
+        ? 'rgba(139, 92, 246, 0.7)'
+        : 'rgba(229, 9, 20, 0.7)';
 
     return (
         <div
@@ -167,39 +183,60 @@ const MovieCard = ({ movie, index = 0, onClick }) => {
                         style={{ opacity: imageLoaded ? 1 : 0 }}
                     />
 
-                    {/* Loading skeleton */}
-                    {!imageLoaded && <div className="card-skeleton"></div>}
+                    {/* Loading skeleton with shimmer */}
+                    {!imageLoaded && (
+                        <div className="card-skeleton">
+                            <div className="skeleton-shimmer"></div>
+                        </div>
+                    )}
 
                     {/* Shine effect */}
                     <div className="card-shine"></div>
                 </div>
 
-                {/* Rating Badge */}
-                <div className="card-rating">
-                    <svg viewBox="0 0 24 24" fill="currentColor" width="12" height="12">
-                        <path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z" />
-                    </svg>
-                    {movie.rating}
+                {/* Top Badges Row */}
+                <div className="card-badges-top">
+                    {/* Rating Badge */}
+                    <div className="card-rating">
+                        <svg viewBox="0 0 24 24" fill="currentColor" width="12" height="12">
+                            <path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z" />
+                        </svg>
+                        {movie.rating}
+                    </div>
+
+                    {/* Type Badge */}
+                    <div className={`card-type-badge ${movie.type}`}>
+                        {movie.type === 'anime' ? '🎌' : '🎬'}
+                    </div>
                 </div>
 
-                {/* Type Badge */}
-                <div className={`card-type-badge ${movie.type}`}>
-                    {movie.type === 'anime' ? '🎌' : '🎬'}
-                </div>
+                {/* Dark Gradient Overlay */}
+                <div ref={overlayRef} className="card-overlay"></div>
 
-                {/* Overlay with details */}
-                <div ref={overlayRef} className="card-overlay">
-                    <div className="card-info">
-                        <h3 className="card-title">{movie.title}</h3>
-                        <div className="card-meta">
-                            <span className="card-year">{movie.year}</span>
-                            <span className="card-type">{movie.type}</span>
-                        </div>
-                        <div className="card-genres">
-                            {movie.genres?.slice(0, 2).map((genre, i) => (
-                                <span key={i} className="card-genre">{genre}</span>
-                            ))}
-                        </div>
+                {/* Glassmorphism Info Panel - Slides up from bottom */}
+                <div ref={infoRef} className="card-info-panel">
+                    {/* Large Rating */}
+                    <div className="info-rating">
+                        <svg viewBox="0 0 24 24" fill="currentColor" width="16" height="16">
+                            <path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z" />
+                        </svg>
+                        <span>{movie.rating}</span>
+                    </div>
+
+                    {/* Title */}
+                    <h3 className="info-title">{movie.title}</h3>
+
+                    {/* Year & Duration */}
+                    <div className="info-meta">
+                        <span>{movie.year}</span>
+                        {movie.duration && <span>• {movie.duration}</span>}
+                    </div>
+
+                    {/* Genres */}
+                    <div className="info-genres">
+                        {movie.genres?.slice(0, 3).map((genre, i) => (
+                            <span key={i} className="info-genre">{genre}</span>
+                        ))}
                     </div>
                 </div>
 
